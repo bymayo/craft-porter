@@ -1,0 +1,246 @@
+{% extends '_layouts/cp' %}
+
+{% do view.registerAssetBundle("bymayo\\porter\\assetbundles\\porter\\PorterAsset") %}
+
+{% import "_includes/forms" as forms %}
+
+{% set fullPageForm = true %}
+
+{% set title = 'Porter Settings' %}
+
+{% set tabs = {
+    delete: {
+        label: 'Delete Account', 
+        url: '#delete'
+    },
+    deactivate: {
+        label: 'Deactivate Account', 
+        url: '#deactivate'
+    },
+    magicLink: {
+        label: 'Magic Link', 
+        url: '#magic-link'
+    },
+    emailPassword: {
+        label: 'Email & Password', 
+        url: '#email-password'
+    }
+} %}
+
+{% block content %}
+
+    <input type="hidden" name="action" value="porter/settings/save">
+    <input type="hidden" name="pluginHandle" value="porter">
+
+    <div id="delete"> 
+
+        {{ forms.lightswitchField({
+            label: 'Delete Account',
+            instructions: 'Allow users to delete their own account on the front end.',
+            id: 'deleteAccount',
+            name: 'settings[deleteAccount]',
+            on: settings['deleteAccount'],
+            toggle: 'deleteAccount-options'
+        }) }}
+
+        <div id="deleteAccount-options">
+
+            {{ forms.selectField({
+                label: 'Confirmation Type',
+                id: 'deleteAccountConfirmationType',
+                name: 'settings[deleteAccountConfirmationType]',
+                value: settings['deleteAccountConfirmationType'],
+                toggle: true,
+                options: [
+                    { value: 'confirmationTypeKeyword', label: 'Keyword (E.g. DELETE)' },
+                    { value: 'confirmationTypeField', label: 'Field (E.g. First Name)' }
+                ]
+            }) }}
+
+            <div id="confirmationTypeKeyword"{% if settings['deleteAccountConfirmationType'] != 'confirmationKeyword' %} class="hidden"{% endif %}>
+                {{ forms.textField({
+                    label: 'Confirmation Keyword',
+                    instructions: 'The word/phrase that is needed to confirm before the users account is deleted.',
+                    id: 'deleteAccountConfirmationKeyword',
+                    name: 'settings[deleteAccountConfirmationKeyword]',
+                    value: settings['deleteAccountConfirmationKeyword']})
+                }}
+            </div>
+
+            <div id="confirmationTypeField"{% if settings['deleteAccountConfirmationType'] != 'confirmationField' %} class="hidden"{% endif %}>
+                {{ forms.selectField({
+                    label: 'Confirmation Field',
+                    instructions: 'The field that is needed to confirm before the users account is deleted.',
+                    id: 'deleteAccountConfirmationField',
+                    name: 'settings[deleteAccountConfirmationField]',
+                    value: settings['deleteAccountConfirmationField'],
+                    options: [
+                        { value: 'fullName', label: 'Full Name' },
+                        { value: 'firstName', label: 'First Name' },
+                        { value: 'lastName', label: 'Last Name' },
+                        { value: 'email', label: 'Email' }
+                    ]
+                }) }}
+            </div>
+
+            {{ forms.lightswitchField({
+                label: 'Send Confirmation Email',
+                id: 'deleteAccountConfirmationEmail',
+                name: 'settings[deleteAccountConfirmationEmail]',
+                on: settings['deleteAccountConfirmationEmail']
+            }) }}
+
+            {{ forms.textField({
+                label: 'Redirect',
+                id: 'deleteAccountRedirect',
+                name: 'settings[deleteAccountRedirect]',
+                value: settings['deleteAccountRedirect']
+            }) }}
+
+            {{ forms.elementSelectField({
+                label: "Transfer content to",
+                instructions: 'If the deleted user has content, transfer it to a new user.',
+                id: 'deleteAccountTransfer',
+                name: 'settings[deleteAccountTransfer]',
+                elementType: "craft\\elements\\User",
+                selectionLabel: "Choose a User",
+                elements: [settings.deleteAccountTransfer],
+                limit: 1
+            }) }}
+
+        </div>
+
+    </div>
+
+    <div id="deactivate" class="hidden">
+
+        {{ forms.lightswitchField({
+            label: 'Deactivate Account',
+            instructions: 'Allow users to deactivate their own account on the front end.',
+            id: 'deactivateAccount',
+            name: 'settings[deactivateAccount]',
+            on: settings['deactivateAccount'],
+            toggle: 'deactivateAccount-options'
+        }) }}
+
+        <div id="deactivateAccount-options">
+
+            {{ forms.textField({
+                label: 'Redirect',
+                id: 'deactivateAccountRedirect',
+                name: 'settings[deactivateAccountRedirect]',
+                value: settings['deactivateAccountRedirect']
+            }) }}
+
+            {{ forms.lightswitchField({
+                label: 'Send Confirmation Email',
+                id: 'deactivateAccountConfirmationEmail',
+                name: 'settings[deactivateAccountConfirmationEmail]',
+                on: settings['deactivateAccountConfirmationEmail']
+            }) }}
+
+            {{ forms.textField({
+                label: 'Delete deactivated users timeframe',
+                instructions: 'The number of days until deactivated users get trashed.',
+                id: 'deactivateAccountDeleteDays',
+                name: 'settings[deactivateAccountDeleteDays]',
+                value: settings['deactivateAccountDeleteDays']})
+            }}
+
+        </div>
+
+    </div>
+
+    <div id="magic-link" class="hidden">
+
+        {{ forms.lightswitchField({
+            label: 'Control Panel Login',
+            instructions: 'Enable Magic Link for users who have permission to access the CP.',
+            id: 'magicLinkControlPanel',
+            name: 'settings[magicLinkControlPanel]',
+            on: settings['magicLinkControlPanel']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Front End Login',
+            id: 'magicLinkFrontEnd',
+            name: 'settings[magicLinkFrontEnd]',
+            on: settings['magicLinkFrontEnd']
+        }) }}
+
+        {{ forms.textField({
+            label: 'Expiry Timeframe',
+            instructions: 'The number of seconds magic links take to expire.',
+            id: 'magicLinkExpirySeconds',
+            name: 'settings[magicLinkExpirySeconds]',
+            value: settings['magicLinkExpirySeconds']})
+        }}
+
+    </div>
+
+    <div id="email-password" class="hidden">
+
+        {{ forms.lightswitchField({
+            label: 'Block Burner / Disposable Emails',
+            instructions: 'Block disposable, non-existent domain or invalid emails.',
+            id: 'emailBurners',
+            name: 'settings[emailBurners]',
+            on: settings['emailBurners'],
+            toggle: 'emailBurners-options'
+        }) }}
+
+        <div id="emailBurners-options">
+
+            {{ forms.textField({
+                label: 'Verifier API Key',
+                instructions: 'Get your free API key from https://verifier.meetchopra.com.',
+                id: 'emailsBurnersVerifierApiKey',
+                name: 'settings[emailsBurnersVerifierApiKey]',
+                value: settings['emailsBurnersVerifierApiKey']
+            }) }}
+
+        </div>
+
+        {{ forms.lightswitchField({
+            label: 'Force Password Policy',
+            id: 'passwordForcePolicy',
+            name: 'settings[passwordForcePolicy]',
+            on: settings['passwordForcePolicy'],
+            toggle: 'passwordForcePolicy-options'
+        }) }}
+
+        <div id="passwordForcePolicy-options">
+
+            {{ forms.textField({
+                label: 'Password Minimum Length',
+                id: 'passwordForcePolicyMin',
+                name: 'settings[passwordForcePolicyMin]',
+                value: settings['passwordForcePolicyMin']
+            }) }}
+
+            {{ forms.textField({
+                label: 'Password Maximum Length',
+                id: 'passwordForcePolicyMax',
+                name: 'settings[passwordForcePolicyMax]',
+                value: settings['passwordForcePolicyMax']
+            }) }}
+
+            {{ forms.checkboxSelectField({
+                label: 'Password Rules',
+                id: 'passwordForcePolicyRules',
+                name: 'settings[passwordForcePolicyRules]',
+                options: [
+                    { value: 'lowercase', label: 'At least one lower case character (a-z)' },
+                    { value: 'uppercase', label: 'At least one upper case character (A-Z)' },
+                    { value: 'numeric', label: 'At least one numeric character (0-9)' },
+                    { value: 'symbol', label: 'At least one symbol character (@,#,$ etc)' }
+                ],
+                values: settings['passwordForcePolicyRules'],
+                showAllOption: false
+            }) }}
+
+        </div>
+
+    </div>
+
+{% endblock %}
