@@ -179,32 +179,36 @@ class Porter extends Plugin
             User::EVENT_BEFORE_VALIDATE,
             function (ModelEvent $event) {
 
-                $user = $event->sender;
+                if (!Craft::$app->getRequest()->getIsCpRequest()) {
 
-                if ($this->settings->emailBurners)
-                {
+                    $user = $event->sender;
 
-                    $errors = $this->emailPassword->checkBurnerEmail($user->email);
-
-                    foreach ($errors as $error) {
-                        $user->addError('email', $error);
-                    }
-                    
-                }
-
-                if ($this->settings->passwordForcePolicy && ($user->newPassword || strlen($user->newPassword) >= 0))
-                {
-
-                    $errors = $this->emailPassword->checkPasswordPolicy($user->newPassword);
-
-                    if ($errors)
+                    if ($this->settings->emailBurners)
                     {
 
-                        $event->isValid = 0;
+                        $errors = $this->emailPassword->checkBurnerEmail($user->email);
 
                         foreach ($errors as $error) {
-                            $user->addError('newPassword', $error);
-                        }    
+                            $user->addError('email', $error);
+                        }
+                        
+                    }
+
+                    if ($this->settings->passwordForcePolicy && ($user->newPassword || strlen($user->newPassword) >= 0))
+                    {
+
+                        $errors = $this->emailPassword->checkPasswordPolicy($user->newPassword);
+
+                        if ($errors)
+                        {
+
+                            $event->isValid = 0;
+
+                            foreach ($errors as $error) {
+                                $user->addError('newPassword', $error);
+                            }    
+
+                        }
 
                     }
 
