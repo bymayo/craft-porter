@@ -21,7 +21,7 @@ class SettingsController extends Controller
 
         if (isset($settings['deleteAccountTransfer']))
         {
-            
+
             // $settings['deleteAccountTransfer'] = Craft::$app->getElements()->getElementById($settings['deleteAccountTransfer'][0]);
 
             // $user = Craft::$app->getElements()->getElementById($settings['deleteAccountTransfer']);

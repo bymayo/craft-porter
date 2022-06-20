@@ -75,7 +75,7 @@ class Settings extends Model
 
     public $passwordForcePolicyRules = null;
 
-    public function rules()
+    public function rules(): array
     {
         return [
             [

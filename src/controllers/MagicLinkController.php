@@ -11,7 +11,7 @@ use craft\helpers\UrlHelper;
 class MagicLinkController extends Controller
 {
 
-   protected $allowAnonymous = array('request', 'access');
+   protected array|int|bool $allowAnonymous = array('request', 'access');
 
    public function actionRequest()
    {

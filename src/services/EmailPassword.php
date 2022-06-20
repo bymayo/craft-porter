@@ -13,7 +13,7 @@ class EmailPassword extends Component
 
    private $settings;
 
-   public function init()
+   public function init(): void
    {
        $this->settings = Porter::getInstance()->helper->settings();
    }

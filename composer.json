@@ -11,7 +11,7 @@
         "porter"
     ],
     "support": {
-        "docs": "https://github.com/bymayo/porter/blob/master/README.md",
+        "docs": "https://github.com/bymayo/porter/blob/craft-4/README.md",
         "issues": "https://github.com/bymayo/porter/issues"
     },
     "license": "MIT",
@@ -22,12 +22,11 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^3.0.0"
+        "craftcms/cms": "^4.0.0"
     },
     "require-dev": {
-      "craftcms/cms": "^4.0.0",
-      "codeception/codeception": "^3.0",
-      "vlucas/phpdotenv": "^3.0"
+        "vlucas/phpdotenv": "^3.0",
+        "craftcms/rector": "dev-main"
     },
     "autoload": {
         "psr-4": {
@@ -39,11 +38,19 @@
         "handle": "porter",
         "developer": "Jason Mayo",
         "developerUrl": "https://bymayo.co.uk",
-        "documentationUrl": "https://github.com/bymayo/porter/blob/master/README.md",
-        "changelogUrl": "https://raw.githubusercontent.com/bymayo/porter/master/CHANGELOG.md",
+        "documentationUrl": "https://github.com/bymayo/porter/blob/craft-4/README.md",
+        "changelogUrl": "https://raw.githubusercontent.com/bymayo/porter/craft-4/CHANGELOG.md",
         "components": {
             "porterService": "bymayo\\porter\\services\\PorterService"
         },
         "class": "bymayo\\porter\\Porter"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true
+        }
     }
 }
