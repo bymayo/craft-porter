@@ -237,7 +237,7 @@ By default it will add a basic set of Tailwind CSS classes, but you can add cust
 </tr>
 </table>
 
-> ⚠️ Admin users CANNOT use admin links for security reasons
+> ⚠️ Admin users CANNOT use magic links for security reasons
 
 ### Block Burner / Disposable Emails
 
