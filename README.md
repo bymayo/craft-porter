@@ -6,19 +6,19 @@ Porter is a Craft CMS plugin that is the missing toolbox for all things users.
 
 ## Features
 
-- Delete Account
+- [Delete Account](#delete-account)
     - Allow users to delete their account on the front end
     - Optionally send a email confirmation of account deletion
     - Customisable "keyword" the user needs to type e.g. DELETE or a user field
-- Deactivate Account 
+- [Deactivate Account](#deactivate-account) 
     - Allow users to deactivate their account on the front end
     - Optionally send a email confirmation of account deactivation
     - Deactivated users can optionally be deleted after X days
-- Magic Link
+- [Magic Link](#magic-link)
     - Let's users sign in via a link sent to their email inbox
     - Allow front end and/or control panel login via a link
     - Set expiry timeframe for increased security
-- Block Burner / Disposable Emails
+- [Block Burner / Disposable Emails](#block-burner--disposable-emails)
     - Validate from 22,000+ disposable emails
     - Checks if a domain is valid and exists.
     - Checks email syntax
