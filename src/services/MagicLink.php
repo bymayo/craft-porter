@@ -64,9 +64,7 @@ class MagicLink extends Component
    public function createToken($user)
    {
 
-    // @TODO: Check users who can access the CP can't login
-
-        if ($user && !$user->admin)
+        if ($user && !$user->admin && (!$this->settings->magicLinkControlPanel && !$user->can('accessCp') || $this->settings->magicLinkControlPanel && $user->can('accessCp')))
         {
 
             $this->invalidateTokens($user);
