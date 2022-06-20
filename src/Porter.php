@@ -13,6 +13,7 @@ namespace bymayo\porter;
 use bymayo\porter\services\Helper;
 use bymayo\porter\services\MagicLink;
 use bymayo\porter\services\EmailPassword;
+use bymayo\porter\services\DeactivateAccount;
 use bymayo\porter\services\DeleteAccount;
 use bymayo\porter\variables\PorterVariable;
 use bymayo\porter\models\Settings;
@@ -119,6 +120,7 @@ class Porter extends Plugin
             'helper' => Helper::class,
             'magicLink' => MagicLink::class,
             'deleteAccount' => DeleteAccount::class,
+            'deactivateAccount' => DeactivateAccount::class,
             'emailPassword' => EmailPassword::class
         ]);
 
@@ -161,6 +163,12 @@ class Porter extends Plugin
                             'heading' => Craft::t('porter', 'porter_delete_account_confirmation_email_heading'),
                             'subject' => Craft::t('porter', 'porter_delete_account_confirmation_email_subject'),
                             'body' => Craft::t('porter', 'porter_delete_account_confirmation_email_body')
+                        ],
+                        [
+                            'key' => 'porter_deactivate_account_confirmation_email',
+                            'heading' => Craft::t('porter', 'porter_deactivate_account_confirmation_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_deactivate_account_confirmation_email_subject'),
+                            'body' => Craft::t('porter', 'porter_deactivate_account_confirmation_email_body')
                         ],
                         [
                             'key' => 'porter_magic_link_email',

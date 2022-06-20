@@ -1,0 +1,15 @@
+{% if currentUser and craft.porter.settings.deactivateAccount %}
+
+    {% set porterDeactivateAccountFlash = craft.app.session.getFlash('porter') %}
+
+    {% if porterDeactivateAccountFlash|length %}
+        <div class="{{ alertClass }}">
+            {{ porterDeactivateAccountFlash }}
+        </div>
+    {% endif %}
+
+    <a href="{{ actionUrl('porter/deactivate-account') }}" class="{{ buttonClass }}" onclick="return confirm('{{ 'Deactivating your account results in you not being able to sign in. Are you sure you want to continue?'|t }}')">
+        {{ buttonLabel }}
+    </a>
+
+{% endif %}

@@ -26,6 +26,16 @@ return [
     Your account has been successfully deleted. 
 
     If you weren’t expecting this email, and your account has been deleted by mistake please contact us.',
+    'porter_deactivate_account_flash_success' => 'Your account has been deactivated.',
+    'porter_deactivate_account_flash_admins' => 'Admins cannot deactivate their accounts.',
+    'porter_deactivate_account_flash_permission' => 'You don\'t have permission to deactivate your account.',
+    'porter_deactivate_account_confirmation_email_heading' => 'When a user has deactivated their account.',
+    'porter_deactivate_account_confirmation_email_subject' => 'Your account has been deactivated',
+    'porter_deactivate_account_confirmation_email_body' => 'Hey {{ user.friendlyName }},
+    
+    Your account has been successfully deactivated. 
+
+    If you weren’t expecting this email, and your account has been deactivated by mistake please contact us.',
     'porter_magic_link_token_expired' => 'Magic link token has expired.',
     'porter_magic_link_sent' => 'A magic link has been sent, if the email address exists as a user',
     'porter_magic_link_email_heading' => 'When a user requests a magic link to login.',

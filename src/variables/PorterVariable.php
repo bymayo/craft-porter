@@ -48,4 +48,11 @@ class PorterVariable
 
    }
 
+   public function deactivateAccountForm(Array $properties = null)
+   {
+
+      return Porter::getInstance()->deactivateAccount->renderFormTemplate($properties);
+
+   }
+
 }

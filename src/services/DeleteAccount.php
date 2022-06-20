@@ -34,7 +34,7 @@ class DeleteAccount extends Component
             'fieldContainerClass' => 'mb-3',
             'fieldLabelClass' => 'block mb-2',
             'fieldClass' => 'transition appearance-none block w-full bg-white text-gray-700 border border-gray-400 px-3 py-3 rounded shadow leading-tight placeholder-gray-500 placeholder-opacity-100 | hover:border-gray-500 | focus:border-primary-500 focus:outline-none focus:shadow-outline',
-            'buttonClass' => 'transition bg-black text-white inline-block font-medium py-3 px-6 rounded flex-shrink-0  | hover:bg-primary-600 | focus:outline-none focus:shadow-outline',
+            'buttonClass' => 'transition bg-black text-white inline-block font-medium py-3 px-6 rounded flex-shrink-0 | hover:bg-primary-600 | focus:outline-none focus:shadow-outline',
             'buttonLabel' => 'Delete Account',
             'confirmationClass' => 'font-bold'
          );
@@ -125,13 +125,18 @@ class DeleteAccount extends Component
             if (Craft::$app->getElements()->deleteElement($currentUser)) 
             {
 
-                  Porter::getInstance()->helper->notify(
-                     'porter_delete_account_confirmation_email',
-                     $currentUser->email,
-                     array(
-                         'user' => $currentUser
-                     )
-                 );
+                  if ($this->settings->deleteAccountConfirmationEmail)
+                  {
+
+                     Porter::getInstance()->helper->notify(
+                        'porter_delete_account_confirmation_email',
+                        $currentUser->email,
+                        array(
+                           'user' => $currentUser
+                        )
+                     );
+
+                  }
 
                   Craft::$app->getUser()->logout(false);
 
