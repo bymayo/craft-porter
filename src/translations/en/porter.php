@@ -26,13 +26,14 @@ return [
     Your account has been successfully deleted. 
 
     If you weren’t expecting this email, and your account has been deleted by mistake please contact us.',
+    'porter_magic_link_token_expired' => 'Magic link token has expired.',
     'porter_magic_link_email_heading' => 'When a user requests a magic link to login.',
     'porter_magic_link_email_subject' => 'Your magic link request',
     'porter_magic_link_email_body' => 'Hey {{ user.friendlyName }},
     
     You asked us to send you a magic link so you can quickly sign in securely. 
 
-    <{{link}}>
+    {{link}}
 
     The link above is a magic link, only meant for you. Please don\'t share it with anyone.
 

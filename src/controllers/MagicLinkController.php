@@ -24,7 +24,7 @@ class MagicLinkController extends Controller
 
       if (Porter::getInstance()->magicLink->request($email))
       {
-         $this->redirectToPostedUrl();
+         return $this->redirectToPostedUrl();
       }
 
    }
@@ -40,8 +40,6 @@ class MagicLinkController extends Controller
       {
           return $this->redirect(UrlHelper::siteUrl(Craft::$app->getConfig()->getGeneral()->getPostLoginRedirect()));
       }
-
-      return true;
 
    }
 

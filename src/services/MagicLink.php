@@ -31,8 +31,6 @@ class MagicLink extends Component
         if ($token)
         {
 
-            Porter::log($this->createTokenLink($token));
-
             Porter::getInstance()->helper->notify(
                 'porter_magic_link_email',
                 $user->email,
@@ -71,12 +69,11 @@ class MagicLink extends Component
         if ($user && !$user->admin)
         {
 
-            // Only allow users to have 1 valid token alive
             $this->invalidateTokens($user);
 
             $record = new MagicLinkRecord();
             $record->userId = $user->id;
-            $record->token = Craft::$app->getSecurity()->generateRandomString(32);
+            $record->token = Craft::$app->getSecurity()->generateRandomString(64);
 
             $db = Craft::$app->getDb();
             $transaction = $db->beginTransaction();
@@ -117,15 +114,10 @@ class MagicLink extends Component
 
     if ($query)
     {
-        // Check to see if token is invalid
 
         $user = Craft::$app->users->getUserById($query->userId);
 
         $this->invalidateTokens($user);
-
-        Porter::log(DateTimeHelper::currentTimeStamp());
-        Porter::log(strtotime($query->dateCreated));
-        Porter::log($this->settings->magicLinkExpirySeconds);
 
         if (DateTimeHelper::currentTimeStamp() <= (strtotime($query->dateCreated) + $this->settings->magicLinkExpirySeconds))
         {
@@ -134,13 +126,16 @@ class MagicLink extends Component
             {
 
                 return true;
+
             }
 
         }
 
-        return Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'Magic link token has expired.'));
-
     }
+
+    Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_token_expired'));
+
+    return;
 
    }
 

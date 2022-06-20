@@ -41,12 +41,12 @@ class EmailPassword extends Component
          }
       }
 
-      if (strlen($password) < $this->settings->passwordForcePolicyMin)
+      if (strlen($password) <= $this->settings->passwordForcePolicyMin)
       {
          $errors[] = Craft::t('porter', 'Password must contain at least {min} characters.', ['min' => $this->settings->passwordForcePolicyMin]);
       }
 
-      if (strlen($password) < $this->settings->passwordForcePolicyMax)
+      if (strlen($password) <= $this->settings->passwordForcePolicyMin && strlen($password) >= $this->settings->passwordForcePolicyMax)
       {
          $errors[] = Craft::t('porter', 'Password must be less than {max} characters.', ['max' => $this->settings->passwordForcePolicyMax]);
       }
