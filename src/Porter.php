@@ -1,11 +1,11 @@
 <?php
 /**
- * Porter plugin for Craft CMS 3.x
+ * Porter plugin for Craft CMS
  *
  * A toolkit with lots of helpers for users and accounts
  *
  * @link      https://bymayo.co.uk
- * @copyright Copyright (c) 2020 Jason Mayo
+ * @copyright Copyright (c) 2022 Jason Mayo
  */
 
 namespace bymayo\porter;
@@ -33,15 +33,6 @@ use craft\elements\User;
 use yii\base\Event;
 use yii\base\ModelEvent;
 
-/**
- * Class Porter
- *
- * @author    Jason Mayo
- * @package   Porter
- * @since     1.0.0
- *
- * @property  PorterServiceService $porterService
- */
 class Porter extends Plugin
 {
     // Static Properties

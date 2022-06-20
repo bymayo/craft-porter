@@ -1,24 +1,5 @@
 <?php
-/**
- * Porter plugin for Craft CMS 3.x
- *
- * A toolkit with lots of helpers for users and accounts
- *
- * @link      https://bymayo.co.uk
- * @copyright Copyright (c) 2020 Jason Mayo
- */
 
-namespace bymayo\porter\variables;
-
-use bymayo\porter\Porter;
-
-use Craft;
-
-/**
- * @author    Jason Mayo
- * @package   Porter
- * @since     1.0.0
- */
 class PorterVariable
 {
 

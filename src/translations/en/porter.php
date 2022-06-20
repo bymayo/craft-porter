@@ -1,18 +1,5 @@
 <?php
-/**
- * Porter plugin for Craft CMS 3.x
- *
- * A toolkit with lots of helpers for users and accounts
- *
- * @link      https://bymayo.co.uk
- * @copyright Copyright (c) 2020 Jason Mayo
- */
 
-/**
- * @author    Jason Mayo
- * @package   Porter
- * @since     1.0.0
- */
 return [
     'Porter plugin loaded' => 'Porter plugin loaded',
     'porter_delete_account_flash_success' => 'Your account has been deleted.',
