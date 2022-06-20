@@ -4,6 +4,8 @@
 
 Porter is a Craft CMS plugin that is the missing toolbox for all things users.
 
+<img src="https://raw.githubusercontent.com/bymayo/craft-porter/craft-4/resources/screenshot.png" width="850">
+
 ## Features
 
 - [Delete Account](#delete-account)
