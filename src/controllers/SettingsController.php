@@ -26,20 +26,24 @@ class SettingsController extends Controller
 
             // $user = Craft::$app->getElements()->getElementById($settings['deleteAccountTransfer']);
 
-            $users = [];
-            foreach ($settings['deleteAccountTransfer'] as $user) {
-                $purchasable = Craft::$app->getElements()->getElementById((int)$user);
-                if ($purchasable && $purchasable instanceof ElementInterface) {
-                    Porter::log('Test');
-                    $class = get_class($purchasable);
-                    Porter::log( $class);
-                    $users[$class] = $users[$class] ?? [];
-                    $users[$class][] = $purchasable;
+            // $users = [];
 
-                }
-            }
+            // foreach ($settings['deleteAccountTransfer'] as $user) {
 
-            $settings['deleteAccountTransfer'] = $users;
+            //     $purchasable = Craft::$app->getElements()->getElementById((int)$user);
+
+            //     if ($purchasable && $purchasable instanceof ElementInterface) {
+
+            //         Porter::log('Test');
+            //         $class = get_class($purchasable);
+            //         Porter::log( $class);
+            //         $users[$class] = $users[$class] ?? [];
+            //         $users[$class][] = $purchasable;
+
+            //     }
+            // }
+
+            // $settings['deleteAccountTransfer'] = $users;
 
             // var_dump( $users);
 

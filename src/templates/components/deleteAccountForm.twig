@@ -2,25 +2,31 @@
 
     <form method="post" accept-charset="UTF-8">
 
-        {{ getCsrfInput() }}
-        <input type="hidden" name="action" value="porter/delete-account/delete">
-        <input type="hidden" name="redirect" value="{{ redirect }}">
+        {{ csrfInput() }}
+        {{ actionInput('porter/delete-account/delete') }}
+        {{ redirectInput(redirect) }}
 
         <div class="{{ fieldContainerClass }}">
+
             <label for="confirmationField" class="{{ fieldLabelClass }}">
-                Type the phrase <span class="{{ confirmationClass }}">{{ confirmation }}</span> to confirm you want to permanently delete your account.
+                {{ 'Type the phrase'|t }} <span class="{{ confirmationClass }}">{{ confirmation }}</span> {{ 'to confirm you want to permanently delete your account.'|t }}
             </label>
+
             <input type="text" name="confirmationField" id="confirmationField" class="{{ fieldClass }}" required>
 
-            {% set porterDeleteAccountFlash = craft.session.getFlash('porter') %}
+            {% set porterDeleteAccountFlash = craft.app.session.getFlash('porter') %}
+
             {% if porterDeleteAccountFlash|length %}
                 <div class="{{ alertClass }}">
                     {{ porterDeleteAccountFlash }}
                 </div>
             {% endif %}
+            
         </div>
 
-        <button class="{{ buttonClass }}">{{ buttonLabel }}</button>
+        <button class="{{ buttonClass }}">
+            {{ buttonLabel }}
+        </button>
 
     </form>
 

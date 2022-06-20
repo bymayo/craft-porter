@@ -21,8 +21,7 @@ class DeleteAccountController extends Controller
 
          if (Porter::getInstance()->deleteAccount->deleteAccount($request))
          {
-            $this->redirectToPostedUrl();
-            return true;
+            return $this->redirectToPostedUrl();
          }
 
    }

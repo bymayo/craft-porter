@@ -57,13 +57,15 @@ class DeleteAccount extends Component
             'alertClass' => 'bg-red-100 text-red-500 font-bold px-3 py-2 rounded mt-2',
             'fieldContainerClass' => 'mb-3',
             'fieldLabelClass' => 'block mb-2',
-            'fieldClass' => 'transition appearance-none block w-full bg-white text-gray-700 border border-gray-400 px-3 py-3 rounded shadow leading-tight placeholder-gray-500 placeholder-opacity-100 hover:border-gray-500 focus:border-primary-500 focus:outline-none focus:shadow-outline',
-            'buttonClass' => 'transition bg-primary-500 text-white inline-block font-medium py-3 px-6 rounded flex-shrink-0 hover:bg-primary-600 focus:outline-none focus:shadow-outline',
+            'fieldClass' => 'transition appearance-none block w-full bg-white text-gray-700 border border-gray-400 px-3 py-3 rounded shadow leading-tight placeholder-gray-500 placeholder-opacity-100 | hover:border-gray-500 | focus:border-primary-500 focus:outline-none focus:shadow-outline',
+            'buttonClass' => 'transition bg-black text-white inline-block font-medium py-3 px-6 rounded flex-shrink-0  | hover:bg-primary-600 | focus:outline-none focus:shadow-outline',
             'buttonLabel' => 'Delete Account',
             'confirmationClass' => 'font-bold'
          );
 
-         $properties = array_unique(array_merge($defaultProperties, $properties), SORT_REGULAR);
+         $properties = array_merge($defaultProperties, $properties);
+
+         // Porter::log(print_r($properties, TRUE));
 
          $view = Craft::$app->getView();
 

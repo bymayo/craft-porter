@@ -34,4 +34,11 @@ class PorterVariable
 
    }
 
+   public function deleteAccountConfirmation()
+   {
+
+      return Porter::getInstance()->deleteAccount->confirmationType();
+
+   }
+
 }

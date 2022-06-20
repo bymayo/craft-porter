@@ -94,10 +94,11 @@
                 label: 'Redirect',
                 id: 'deleteAccountRedirect',
                 name: 'settings[deleteAccountRedirect]',
-                value: settings['deleteAccountRedirect']
+                value: settings['deleteAccountRedirect'],
+                instructions: 'Can be overwritten at template level using `redirect`'
             }) }}
 
-            {{ forms.elementSelectField({
+            {# {{ forms.elementSelectField({
                 label: "Transfer content to",
                 instructions: 'If the deleted user has content, transfer it to a new user.',
                 id: 'deleteAccountTransfer',
@@ -106,7 +107,7 @@
                 selectionLabel: "Choose a User",
                 elements: [settings.deleteAccountTransfer],
                 limit: 1
-            }) }}
+            }) }} #}
 
         </div>
 
