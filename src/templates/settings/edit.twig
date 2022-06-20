@@ -155,27 +155,48 @@
     <div id="magic-link" class="hidden">
 
         {{ forms.lightswitchField({
-            label: 'Control Panel Login',
-            instructions: 'Enable Magic Link for users who have permission to access the CP.',
-            id: 'magicLinkControlPanel',
-            name: 'settings[magicLinkControlPanel]',
-            on: settings['magicLinkControlPanel']
+            label: 'Magic Link',
+            instructions: 'Allow users to login via a magic link that is emailed to them.',
+            id: 'magicLink',
+            name: 'settings[magicLink]',
+            on: settings['magicLink'],
+            toggle: 'magicLink-options'
         }) }}
 
-        {{ forms.lightswitchField({
-            label: 'Front End Login',
-            id: 'magicLinkFrontEnd',
-            name: 'settings[magicLinkFrontEnd]',
-            on: settings['magicLinkFrontEnd']
-        }) }}
+        <div id="magicLink-options">
 
-        {{ forms.textField({
-            label: 'Expiry Timeframe',
-            instructions: 'The number of seconds magic links take to expire.',
-            id: 'magicLinkExpirySeconds',
-            name: 'settings[magicLinkExpirySeconds]',
-            value: settings['magicLinkExpirySeconds']})
-        }}
+            {{ forms.lightswitchField({
+                label: 'Control Panel Login',
+                instructions: 'Enable Magic Link for users who have permission to access the CP.',
+                id: 'magicLinkControlPanel',
+                name: 'settings[magicLinkControlPanel]',
+                on: settings['magicLinkControlPanel']
+            }) }}
+
+            {{ forms.lightswitchField({
+                label: 'Front End Login',
+                id: 'magicLinkFrontEnd',
+                name: 'settings[magicLinkFrontEnd]',
+                on: settings['magicLinkFrontEnd']
+            }) }}
+
+            {{ forms.textField({
+                label: 'Expiry Timeframe',
+                instructions: 'The number of seconds magic links take to expire.',
+                id: 'magicLinkExpirySeconds',
+                name: 'settings[magicLinkExpirySeconds]',
+                value: settings['magicLinkExpirySeconds']})
+            }}
+
+            {{ forms.textField({
+                label: 'Redirect',
+                id: 'magicLinkRedirect',
+                name: 'settings[magicLinkRedirect]',
+                value: settings['magicLinkRedirect'],
+                instructions: 'Can be overwritten at template level using `redirect`'
+            }) }}
+
+        </div>
 
     </div>
 

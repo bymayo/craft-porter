@@ -19,30 +19,6 @@ class DeleteAccount extends Component
        $this->settings = Porter::getInstance()->helper->settings();
    }
 
-   public function confirmationType()
-   {
-
-      $confirmationType = $this->settings->deleteAccountConfirmationType;
-      
-      if ($confirmationType == 'confirmationTypeKeyword')
-      {
-         return $this->settings->deleteAccountConfirmationKeyword;
-      }
-      else {
-
-         $confirmationField = $this->settings->deleteAccountConfirmationField;
-
-         $currentUser = Craft::$app->getUser()->getIdentity();
-
-         if ($currentUser)
-         {
-            return $currentUser->$confirmationField;
-         }
-
-      }
-
-   }
-
    public function renderFormTemplate($properties)
    {
 
@@ -78,6 +54,30 @@ class DeleteAccount extends Component
          $view->setTemplatesPath($templatePath);
 
          return Template::raw($template);
+
+      }
+
+   }
+
+   public function confirmationType()
+   {
+
+      $confirmationType = $this->settings->deleteAccountConfirmationType;
+      
+      if ($confirmationType == 'confirmationTypeKeyword')
+      {
+         return $this->settings->deleteAccountConfirmationKeyword;
+      }
+      else {
+
+         $confirmationField = $this->settings->deleteAccountConfirmationField;
+
+         $currentUser = Craft::$app->getUser()->getIdentity();
+
+         if ($currentUser)
+         {
+            return $currentUser->$confirmationField;
+         }
 
       }
 

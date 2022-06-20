@@ -53,11 +53,15 @@ class Settings extends Model
 
     // Magic Link
 
+    public $magicLink = 0;
+
     public $magicLinkControlPanel = 0;
 
     public $magicLinkFrontEnd = 0;
 
     public $magicLinkExpirySeconds = '300';
+
+    public $magicLinkRedirect = '/';
 
     // Email
 
@@ -84,6 +88,7 @@ class Settings extends Model
                     'deleteAccountConfirmationEmail', 
                     'deactivateAccount',
                     'deactivateAccountConfirmationEmail',
+                    'magicLink',
                     'magicLinkControlPanel', 
                     'magicLinkFrontEnd', 
                     'emailBurners', 
@@ -107,6 +112,7 @@ class Settings extends Model
                     'deleteAccountConfirmationField', 
                     'deleteAccountRedirect', 
                     'deactivateAccountRedirect',
+                    'magicLinkRedirect',
                     'emailsBurnersVerifierApiKey'
                 ], 
                 'string'

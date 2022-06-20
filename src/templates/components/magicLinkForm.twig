@@ -1,0 +1,33 @@
+{% if not currentUser and craft.porter.settings.magicLink and craft.porter.settings.magicLinkFrontEnd %}
+
+    <form method="post" accept-charset="UTF-8">
+
+        {{ csrfInput() }}
+        {{ actionInput('porter/magic-link/request') }}
+        {{ redirectInput(redirect) }}
+
+        <div class="{{ fieldContainerClass }}">
+
+            <label for="emailField" class="{{ fieldLabelClass }}">
+                {{ 'Email Address'|t }}
+            </label>
+
+            <input type="email" name="email" id="emailField" class="{{ fieldClass }}" required>
+
+            {% set porterDeleteAccountFlash = craft.app.session.getFlash('porter') %}
+
+            {% if porterDeleteAccountFlash|length %}
+                <div class="{{ alertClass }}">
+                    {{ porterDeleteAccountFlash }}
+                </div>
+            {% endif %}
+
+        </div>
+
+        <button class="{{ buttonClass }}">
+            {{ buttonLabel }}
+        </button>
+
+    </form>
+
+{% endif %}

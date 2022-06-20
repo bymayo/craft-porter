@@ -41,4 +41,11 @@ class PorterVariable
 
    }
 
+   public function magicLinkForm(Array $properties = null)
+   {
+
+      return Porter::getInstance()->magicLink->renderFormTemplate($properties);
+
+   }
+
 }

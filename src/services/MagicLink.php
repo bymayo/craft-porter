@@ -10,6 +10,7 @@ use Craft;
 use craft\base\Component;
 use craft\helpers\UrlHelper;
 use craft\helpers\DateTimeHelper;
+use craft\helpers\Template;
 
 class MagicLink extends Component
 {
@@ -21,24 +22,69 @@ class MagicLink extends Component
         $this->settings = Porter::getInstance()->helper->settings();
     }
 
+    public function renderFormTemplate($properties)
+    {
+ 
+       if (
+             $this->settings->magicLink &&
+             $this->settings->magicLinkFrontEnd &&
+             Craft::$app->request->getIsSiteRequest()
+       ) {
+ 
+          $defaultProperties = array(
+             'redirect' => $this->settings->deleteAccountRedirect,
+             'alertClass' => 'bg-red-100 text-red-500 font-bold px-3 py-2 rounded mt-2',
+             'fieldContainerClass' => 'mb-3',
+             'fieldLabelClass' => 'block mb-2',
+             'fieldClass' => 'transition appearance-none block w-full bg-white text-gray-700 border border-gray-400 px-3 py-3 rounded shadow leading-tight placeholder-gray-500 placeholder-opacity-100 | hover:border-gray-500 | focus:border-primary-500 focus:outline-none focus:shadow-outline',
+             'buttonClass' => 'transition bg-black text-white inline-block font-medium py-3 px-6 rounded flex-shrink-0  | hover:bg-primary-600 | focus:outline-none focus:shadow-outline',
+             'buttonLabel' => 'Send Magic Link',
+             'confirmationClass' => 'font-bold'
+          );
+ 
+          $properties = array_merge($defaultProperties, $properties);
+ 
+          // Porter::log(print_r($properties, TRUE));
+ 
+          $view = Craft::$app->getView();
+ 
+          $templatePath = $view->getTemplatesPath();
+ 
+          $view->setTemplatesPath(Porter::getInstance()->getBasePath());
+ 
+          $template = $view->renderTemplate('/templates/components/magicLinkForm', $properties);
+ 
+          $view->setTemplatesPath($templatePath);
+ 
+          return Template::raw($template);
+ 
+       }
+ 
+    }
+
    public function request($email)
    {
 
-        $user = Craft::$app->getUsers()->getUserByUsernameOrEmail($email);
-
-        $token = $this->createToken($user);
-
-        if ($token)
+        if ($this->settings->magicLink) 
         {
 
-            Porter::getInstance()->helper->notify(
-                'porter_magic_link_email',
-                $user->email,
-                array(
-                    'user' => $user,
-                    'link' => $this->createTokenLink($token)
-                )
-            );
+            $user = Craft::$app->getUsers()->getUserByUsernameOrEmail($email);
+
+            $token = $this->createToken($user);
+
+            if ($token)
+            {
+
+                Porter::getInstance()->helper->notify(
+                    'porter_magic_link_email',
+                    $user->email,
+                    array(
+                        'user' => $user,
+                        'link' => $this->createTokenLink($token)
+                    )
+                );
+            }
+
         }
 
    }
