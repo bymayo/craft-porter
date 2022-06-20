@@ -111,16 +111,16 @@ class DeleteAccount extends Component
                
             }
 
-            $transferContentUser = $this->settings->deleteAccountTransfer;
-            $transferContentTo = null;
+            // $transferContentUser = $this->settings->deleteAccountTransfer;
+            // $transferContentTo = null;
 
-            if ($transferContentUser)
-            {
-               // @TODO: Check this is working
-               $transferContentTo = Craft::$app->getUsers()->getUserById($transferContentUser);
-            }
+            // if ($transferContentUser)
+            // {
+            //    // @TODO: Check this is working
+            //    $transferContentTo = Craft::$app->getUsers()->getUserById($transferContentUser);
+            // }
 
-            $currentUser->inheritorOnDelete = $transferContentTo;
+            // $currentUser->inheritorOnDelete = $transferContentTo;
 
             if (Craft::$app->getElements()->deleteElement($currentUser)) 
             {

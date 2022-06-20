@@ -20,9 +20,7 @@ class MagicLinkController extends Controller
 
       $request = Craft::$app->getRequest();
 
-      $email = $request->getBodyParam('email');
-
-      if (Porter::getInstance()->magicLink->request($email))
+      if (Porter::getInstance()->magicLink->request($request))
       {
          return $this->redirectToPostedUrl();
       }

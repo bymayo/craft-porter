@@ -27,6 +27,7 @@ return [
 
     If you weren’t expecting this email, and your account has been deleted by mistake please contact us.',
     'porter_magic_link_token_expired' => 'Magic link token has expired.',
+    'porter_magic_link_sent' => 'A magic link has been sent, if the email address exists as a user',
     'porter_magic_link_email_heading' => 'When a user requests a magic link to login.',
     'porter_magic_link_email_subject' => 'Your magic link request',
     'porter_magic_link_email_body' => 'Hey {{ user.friendlyName }},

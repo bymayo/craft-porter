@@ -62,11 +62,13 @@ class MagicLink extends Component
  
     }
 
-   public function request($email)
+   public function request($request)
    {
 
         if ($this->settings->magicLink) 
         {
+
+            $email = $request->getBodyParam('email');
 
             $user = Craft::$app->getUsers()->getUserByUsernameOrEmail($email);
 
@@ -83,6 +85,17 @@ class MagicLink extends Component
                         'link' => $this->createTokenLink($token)
                     )
                 );
+
+                if ($request->getAcceptsJson()) 
+                {
+                   return $this->asJson([
+                      'success' => true,
+                      'message' => Craft::t('porter', 'porter_magic_link_sent')
+                   ]);
+                }
+ 
+                Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_sent'));
+                return true;
             }
 
         }
