@@ -57,7 +57,7 @@ The quickest way to add the form to your template is with using the `deleteAccou
 {{ craft.porter.deleteAccountForm() }}
 ```
 
-By default it will add a set of classes prefixed with `porter__`, but you can add customisation parameters so you can change the styling, for example:
+By default it will add a set of classes prefixed with `porter__`, but you can add customisation parameters so you can change the styling, for example if your using Tailwind CSS:
 
 ```
 {{ craft.porter.deleteAccountForm(
@@ -132,7 +132,7 @@ The quickest way to add the form to your template is with using the `deactivateA
 {{ craft.porter.deactivateAccountForm() }}
 ```
 
-By default it will add a set of classes prefixed with `porter__`, but you can add customisation parameters so you can change the styling, for example:
+By default it will add a set of classes prefixed with `porter__`, but you can add customisation parameters so you can change the styling, for example if your using Tailwind CSS:
 
 ```
 {{ craft.porter.deactivateAccountForm(
@@ -185,7 +185,7 @@ The quickest way to add the form to your template is with using the `magicLinkFo
 {{ craft.porter.magicLinkForm() }}
 ```
 
-By default it will add a set of classes prefixed with `porter__`, but you can add customisation parameters so you can change the styling, for example:
+By default it will add a set of classes prefixed with `porter__`, but you can add customisation parameters so you can change the styling, for example if your using Tailwind CSS:
 
 ```
 {{ craft.porter.magicLinkForm(
