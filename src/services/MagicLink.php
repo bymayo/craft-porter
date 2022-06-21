@@ -33,12 +33,12 @@ class MagicLink extends Component
  
           $defaultProperties = array(
              'redirect' => $this->settings->magicLinkRedirect,
-             'alertClass' => 'bg-red-100 text-red-500 font-bold px-3 py-2 rounded mt-2',
-             'fieldContainerClass' => 'mb-3',
-             'fieldLabelClass' => 'block mb-2',
-             'fieldClass' => 'transition appearance-none block w-full bg-white text-gray-700 border border-gray-400 px-3 py-3 rounded shadow leading-tight placeholder-gray-500 placeholder-opacity-100 | hover:border-gray-500 | focus:border-primary-500 focus:outline-none focus:shadow-outline',
-             'buttonClass' => 'transition bg-black text-white inline-block font-medium py-3 px-6 rounded flex-shrink-0  | hover:bg-primary-600 | focus:outline-none focus:shadow-outline',
-             'buttonLabel' => 'Send Magic Link',
+             'alertClass' => 'porter__alert',
+             'fieldContainerClass' => 'porter__field-container',
+             'fieldLabelClass' => 'porter__field-label',
+             'fieldClass' => 'porter__field',
+             'buttonClass' => 'porter__button',
+             'buttonText' => 'Send Magic Link',
           );
  
           $properties = array_merge($defaultProperties, $properties);

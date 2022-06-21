@@ -49,7 +49,7 @@ You can also install the plugin via the Plugin Store in the Craft Admin CP by se
 
 ### Delete Account
 
-Allow users to delete their own account via a front end form. To enable this got to `Settings > Porter` and toggle the `Delete Account` field. Also edit the settings such as what confirmation keyword the user needs to type before their account is deleted.
+Allow users to delete their own account via a front end form. To enable this go to `Settings > Porter` and toggle the `Delete Account` field. Also edit the settings such as what confirmation keyword the user needs to type before their account is deleted.
 
 The quickest way to add the form to your template is with using the `deleteAccountForm` method:
 
@@ -57,13 +57,13 @@ The quickest way to add the form to your template is with using the `deleteAccou
 {{ craft.porter.deleteAccountForm() }}
 ```
 
-By default it will add a basic set of Tailwind CSS classes, but you can add customisation parameters so you can change the styling, for example:
+By default it will add a set of classes prefixed with `porter__`, but you can add customisation parameters so you can change the styling, for example:
 
 ```
 {{ craft.porter.deleteAccountForm(
     {
         buttonClass: 'bg-black text-white hover:bg-white hover:text-black',
-        buttonLabel: 'Delete Account'
+        buttonText: 'Delete Account'
     }
 ) }}
 ```
@@ -80,39 +80,39 @@ By default it will add a basic set of Tailwind CSS classes, but you can add cust
 <td>When the users account is deleted, this is where they'll be redirected to.</td>
 </tr>
 <tr>
+<td>confirmationClass</td>
+<td>porter__confirmation</td>
+<td>Class for the confirmation keyword</td>
+</tr>
+<tr>
 <td>alertClass</td>
-<td></td>
+<td>porter__alert</td>
 <td>Class for the flash that shows when a user account is deleted.</td>
 </tr>
 <tr>
 <td>fieldClass</td>
-<td></td>
+<td>porter__field</td>
 <td>Class for the input field.</td>
 </tr>
 <tr>
 <td>fieldContainerClass</td>
-<td></td>
+<td>porter__field-container</td>
 <td>Class for div that wraps label and input field.</td>
 </tr>
 <tr>
 <td>fieldLabelClass</td>
-<td></td>
+<td>porter__field-label</td>
 <td>Class for the input label.</td>
 </tr>
 <tr>
 <td>buttonClass</td>
-<td></td>
+<td>porter__button</td>
 <td>Class for the button.</td>
 </tr>
 <tr>
-<td>buttonLabel</td>
+<td>buttonText</td>
 <td>Delete Account</td>
 <td>Text that appears in the button</td>
-</tr>
-<tr>
-<td>confirmationClass</td>
-<td></td>
-<td>Class for the confirmation keyword</td>
 </tr>
 </table>
 
@@ -124,7 +124,7 @@ If you want to have more control you can get the full template from `bymayo/port
 
 ### Deactivate Account
 
-Allow users to deactivate their own account via a front end form. To enable this got to `Settings > Porter` and toggle the `Deactivate Account` field.
+Allow users to deactivate their own account via a front end form. To enable this go to `Settings > Porter` and toggle the `Deactivate Account` field.
 
 The quickest way to add the form to your template is with using the `deactivateAccountForm` method:
 
@@ -132,13 +132,13 @@ The quickest way to add the form to your template is with using the `deactivateA
 {{ craft.porter.deactivateAccountForm() }}
 ```
 
-By default it will add a basic set of Tailwind CSS classes, but you can add customisation parameters so you can change the styling, for example:
+By default it will add a set of classes prefixed with `porter__`, but you can add customisation parameters so you can change the styling, for example:
 
 ```
 {{ craft.porter.deactivateAccountForm(
     {
         buttonClass: 'bg-black text-white hover:bg-white hover:text-black',
-        buttonLabel: 'Deactivate Account'
+        buttonText: 'Deactivate Account'
     }
 ) }}
 ```
@@ -156,16 +156,16 @@ By default it will add a basic set of Tailwind CSS classes, but you can add cust
 </tr>
 <tr>
 <td>alertClass</td>
-<td></td>
-<td>Class for the flash that shows when a user account is deactivated.</td>
+<td>porter__alert</td>
+<td>Class for the flash that shows when a user account is deleted.</td>
 </tr>
 <tr>
 <td>buttonClass</td>
-<td></td>
+<td>porter__button</td>
 <td>Class for the button.</td>
 </tr>
 <tr>
-<td>buttonLabel</td>
+<td>buttonText</td>
 <td>Deactivate Account</td>
 <td>Text that appears in the button</td>
 </tr>
@@ -185,13 +185,13 @@ The quickest way to add the form to your template is with using the `magicLinkFo
 {{ craft.porter.magicLinkForm() }}
 ```
 
-By default it will add a basic set of Tailwind CSS classes, but you can add customisation parameters so you can change the styling, for example:
+By default it will add a set of classes prefixed with `porter__`, but you can add customisation parameters so you can change the styling, for example:
 
 ```
 {{ craft.porter.magicLinkForm(
     {
         buttonClass: 'bg-black text-white hover:bg-white hover:text-black',
-        buttonLabel: 'Deactivate Account'
+        buttonText: 'Deactivate Account'
     }
 ) }}
 ```
@@ -209,31 +209,31 @@ By default it will add a basic set of Tailwind CSS classes, but you can add cust
 </tr>
 <tr>
 <td>alertClass</td>
-<td></td>
-<td>Class for the flash that shows when a magic link is requested.</td>
+<td>porter__alert</td>
+<td>Class for the flash that shows when a user account is deleted.</td>
 </tr>
 <tr>
 <td>fieldClass</td>
-<td></td>
+<td>porter__field</td>
 <td>Class for the input field.</td>
 </tr>
 <tr>
 <td>fieldContainerClass</td>
-<td></td>
+<td>porter__field-container</td>
 <td>Class for div that wraps label and input field.</td>
 </tr>
 <tr>
 <td>fieldLabelClass</td>
-<td></td>
+<td>porter__field-label</td>
 <td>Class for the input label.</td>
 </tr>
 <tr>
 <td>buttonClass</td>
-<td></td>
+<td>porter__button</td>
 <td>Class for the button.</td>
 </tr>
 <tr>
-<td>buttonLabel</td>
+<td>buttonText</td>
 <td>Send Magic Link</td>
 <td>Text that appears in the button</td>
 </tr>

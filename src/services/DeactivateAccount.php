@@ -29,9 +29,9 @@ class DeactivateAccount extends Component
 
          $defaultProperties = array(
             'redirect' => $this->settings->deactivateAccountRedirect,
-            'alertClass' => 'bg-red-100 text-red-500 font-bold px-3 py-2 rounded mt-2',
-            'buttonClass' => 'transition bg-black text-white inline-block font-medium py-3 px-6 rounded flex-shrink-0 | hover:bg-primary-600 | focus:outline-none focus:shadow-outline',
-            'buttonLabel' => 'Deactivate Account',
+            'alertClass' => 'porter__alert',
+            'buttonClass' => 'porter__button',
+            'buttonText' => 'Deactivate Account'
          );
 
          $properties = array_merge($defaultProperties, $properties);
