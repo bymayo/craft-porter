@@ -191,7 +191,7 @@ By default it will add a set of classes prefixed with `porter__`, but you can ad
 {{ craft.porter.magicLinkForm(
     {
         buttonClass: 'bg-black text-white hover:bg-white hover:text-black',
-        buttonText: 'Deactivate Account'
+        buttonText: 'Send Magic Link'
     }
 ) }}
 ```
@@ -252,3 +252,10 @@ You will need to register at  https://verifier.meetchopra.com/ to get a __FREE__
 If you have any issues (Surely not!) then I'll aim to reply to these as soon as possible. If it's a site-breaking-oh-no-what-has-happened moment, then hit me up on the Craft CMS Discord - @bymayo
 
 ## Roadmap
+
+- Widgets, widgets, widgets! Who doesn't love widgets. 
+- Transfer content option for deleted users
+- Console command for garbage collection on deactivated users 
+- User moderation
+- A cleaner/secure way of letting users choose member groups on sign up
+- More 2FA features (SMS, Auth apps etc)
