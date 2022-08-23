@@ -1,5 +1,11 @@
 <?php
 
+namespace bymayo\porter\variables;
+
+use bymayo\porter\Porter;
+
+use Craft;
+
 class PorterVariable
 {
 
