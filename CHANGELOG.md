@@ -1,5 +1,9 @@
 # Porter Changelog
 
+## 1.0.3 - 2022-08-23
+### Added
+- `porter.php` config file example.
+
 ## 1.0.2 - 2022-08-23
 ### Added
 - `craft.porter.deleteAccountFormProperties()` variable to get default delete account form template properties in Twig.

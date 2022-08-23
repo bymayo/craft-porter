@@ -1,12 +1,4 @@
 <?php
-/**
- * Porter plugin for Craft CMS 3.x
- *
- * A toolkit with lots of helpers for users and accounts
- *
- * @link      https://bymayo.co.uk
- * @copyright Copyright (c) 2020 Jason Mayo
- */
 
 /**
  * Porter config.php
@@ -24,7 +16,36 @@
 
 return [
 
-    // This controls blah blah blah
-    "someAttribute" => true,
+    // Delete Account
+    'deleteAccount' => false,
+    'deleteAccountConfirmationType' => 'confirmationKeyword',
+    'deleteAccountConfirmationKeyword' => 'DELETE',
+    'deleteAccountConfirmationField' => 'email',
+    'deleteAccountConfirmationEmail' => true,
+    'deleteAccountRedirect' => '/',
+    'deleteAccountTransfer' => null,
 
+    // Deactivate Account
+    'deactivateAccount' => false,
+    'deactivateAccountRedirect' => '/',
+    'deactivateAccountConfirmationEmail' => true,
+    'deactivateAccountDeleteDays' => 30,
+
+    // Magic Link
+    'magicLink' => false,
+    'magicLinkControlPanel' => false,
+    'magicLinkFrontEnd' => false,
+    'magicLinkExpirySeconds' => '300',
+    'magicLinkRedirect' => '/',
+
+    // Email
+    'emailBurners' => false,
+    'emailsBurnersVerifierApiKey' => null,
+
+    // Password
+    'passwordForcePolicy' => false,
+    'passwordForcePolicyMin' => 8,
+    'passwordForcePolicyMax' => 128,
+    'passwordForcePolicyRules' => null
+    
 ];
