@@ -41,7 +41,7 @@ class MagicLink extends Component
              'buttonText' => 'Send Magic Link',
           );
  
-          $properties = array_merge($defaultProperties, $properties);
+          $properties = $properties ? array_merge($defaultProperties, $properties) : $defaultProperties;
  
           // Porter::log(print_r($properties, TRUE));
  
