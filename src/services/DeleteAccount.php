@@ -13,10 +13,30 @@ class DeleteAccount extends Component
 {
 
    private $settings;
+   private $defaultTemplateProperties;
 
    public function init(): void
    {
+
        $this->settings = Porter::getInstance()->helper->settings();
+
+       $this->defaultTemplateProperties = array(
+         'redirect' => $this->settings->deleteAccountRedirect,
+         'confirmation' => $this->confirmationType(),
+         'confirmationClass' => 'porter__confirmation',
+         'alertClass' => 'porter__alert',
+         'fieldContainerClass' => 'porter__field-container',
+         'fieldLabelClass' => 'porter__field-label',
+         'fieldClass' => 'porter__field',
+         'buttonClass' => 'porter__button',
+         'buttonText' => 'Delete Account'
+      );
+
+   }
+
+   public function defaultTemplateProperties()
+   {
+      return $this->defaultTemplateProperties;
    }
 
    public function renderFormTemplate($properties)
@@ -27,19 +47,7 @@ class DeleteAccount extends Component
             Craft::$app->request->getIsSiteRequest()
       ) {
 
-         $defaultProperties = array(
-            'redirect' => $this->settings->deleteAccountRedirect,
-            'confirmation' => $this->confirmationType(),
-            'confirmationClass' => 'porter__confirmation',
-            'alertClass' => 'porter__alert',
-            'fieldContainerClass' => 'porter__field-container',
-            'fieldLabelClass' => 'porter__field-label',
-            'fieldClass' => 'porter__field',
-            'buttonClass' => 'porter__button',
-            'buttonText' => 'Delete Account'
-         );
-
-         $properties = $properties ? array_merge($defaultProperties, $properties) : $defaultProperties;
+         $properties = $properties ? array_merge($this->defaultTemplateProperties, $properties) : $this->defaultTemplateProperties;
 
          // Porter::log(print_r($properties, TRUE));
 

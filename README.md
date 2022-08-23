@@ -116,7 +116,15 @@ By default it will add a set of classes prefixed with `porter__`, but you can ad
 </tr>
 </table>
 
-If you want to have more control you can get the full template from `bymayo/porter/src/templates/components/deleteAccountForm.twig`
+If you want to have more control you can get the full template from `bymayo/porter/src/templates/components/deleteAccountForm.twig`. 
+
+With this method, you can also get the default template properties by using `craft.porter.deleteAccountFormProperties()` and pulling a specific property from it:
+
+```
+{% set formProperties = craft.porter.deleteAccountFormProperties() %}
+
+{{ formProperties.buttonText }}
+```
 
 > ⚠️ Users will only be able to delete their own accounts if the permission setting "Delete Users" is enabled on the user, or user group.
 
@@ -172,6 +180,14 @@ By default it will add a set of classes prefixed with `porter__`, but you can ad
 </table>
 
 If you want to have more control you can get the full template from `bymayo/porter/src/templates/components/deactivateAccountForm.twig`
+
+With this method, you can also get the default template properties by using `craft.porter.deactivateAccountFormProperties()` and pulling a specific property from it:
+
+```
+{% set formProperties = craft.porter.deactivateAccountFormProperties() %}
+
+{{ formProperties.buttonText }}
+```
 
 > ⚠️ Admin users CANNOT deactivate their own accounts for security reasons
 
@@ -238,6 +254,16 @@ By default it will add a set of classes prefixed with `porter__`, but you can ad
 <td>Text that appears in the button</td>
 </tr>
 </table>
+
+If you want to have more control you can get the full template from `bymayo/porter/src/templates/components/magicLinkForm.twig`
+
+With this method, you can also get the default template properties by using `craft.porter.magicLinkFormProperties()` and pulling a specific property from it:
+
+```
+{% set formProperties = craft.porter.magicLinkFormProperties() %}
+
+{{ formProperties.buttonText }}
+```
 
 > ⚠️ Admin users CANNOT use magic links for security reasons
 

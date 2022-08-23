@@ -16,10 +16,28 @@ class MagicLink extends Component
 {
 
     private $settings;
+    private $defaultTemplateProperties;
 
     public function init(): void
     {
+
         $this->settings = Porter::getInstance()->helper->settings();
+
+        $this->defaultTemplateProperties = array(
+            'redirect' => $this->settings->magicLinkRedirect,
+            'alertClass' => 'porter__alert',
+            'fieldContainerClass' => 'porter__field-container',
+            'fieldLabelClass' => 'porter__field-label',
+            'fieldClass' => 'porter__field',
+            'buttonClass' => 'porter__button',
+            'buttonText' => 'Send Magic Link',
+         );
+
+    }
+
+    public function defaultTemplateProperties()
+    {
+       return $this->defaultTemplateProperties;
     }
 
     public function renderFormTemplate($properties)
@@ -41,7 +59,7 @@ class MagicLink extends Component
              'buttonText' => 'Send Magic Link',
           );
  
-          $properties = $properties ? array_merge($defaultProperties, $properties) : $defaultProperties;
+          $properties = $properties ? array_merge($this->defaultTemplateProperties, $properties) : $this->defaultTemplateProperties;
  
           // Porter::log(print_r($properties, TRUE));
  

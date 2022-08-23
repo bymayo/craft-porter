@@ -21,6 +21,13 @@ class PorterVariable
 
    }
 
+   public function deleteAccountFormProperties()
+   {
+
+      return Porter::getInstance()->deleteAccount->defaultTemplateProperties();
+
+   }
+
    public function deleteAccountConfirmation()
    {
 
@@ -35,10 +42,24 @@ class PorterVariable
 
    }
 
+   public function magicLinkFormProperties()
+   {
+
+      return Porter::getInstance()->magicLink->defaultTemplateProperties();
+
+   }
+
    public function deactivateAccountForm(Array $properties = null)
    {
 
       return Porter::getInstance()->deactivateAccount->renderFormTemplate($properties);
+
+   }
+
+   public function deactivateAccountFormProperties()
+   {
+
+      return Porter::getInstance()->deactivateAccount->defaultTemplateProperties();
 
    }
 

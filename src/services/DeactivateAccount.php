@@ -13,10 +13,25 @@ class DeactivateAccount extends Component
 {
 
    private $settings;
+   private $defaultTemplateProperties;
 
    public function init(): void
    {
+
        $this->settings = Porter::getInstance()->helper->settings();
+
+       $this->defaultTemplateProperties = array(
+         'redirect' => $this->settings->deactivateAccountRedirect,
+         'alertClass' => 'porter__alert',
+         'buttonClass' => 'porter__button',
+         'buttonText' => 'Deactivate Account'
+      );
+      
+   }
+
+   public function defaultTemplateProperties()
+   {
+      return $this->defaultTemplateProperties;
    }
 
    public function renderFormTemplate($properties)
@@ -34,7 +49,7 @@ class DeactivateAccount extends Component
             'buttonText' => 'Deactivate Account'
          );
 
-         $properties = $properties ? array_merge($defaultProperties, $properties) : $defaultProperties;
+         $properties = $properties ? array_merge($this->defaultTemplateProperties, $properties) : $this->defaultTemplateProperties;
 
          // Porter::log(print_r($properties, TRUE));
 
