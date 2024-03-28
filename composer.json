@@ -2,7 +2,7 @@
     "name": "bymayo/porter",
     "description": "A toolkit with lots of helpers for users and accounts",
     "type": "craft-plugin",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "keywords": [
         "craft",
         "cms",

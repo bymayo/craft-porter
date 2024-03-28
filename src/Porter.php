@@ -178,36 +178,32 @@ class Porter extends Plugin
             User::EVENT_BEFORE_VALIDATE,
             function (ModelEvent $event) {
 
-                if (!Craft::$app->getRequest()->getIsCpRequest()) {
+                $user = $event->sender;
 
-                    $user = $event->sender;
+                if ($this->settings->emailBurners && $this->settings->emailsBurnersVerifierApiKey)
+                {
 
-                    if ($this->settings->emailBurners)
+                    $errors = $this->emailPassword->checkBurnerEmail($user->email);
+
+                    foreach ($errors as $error) {
+                        $user->addError('email', $error);
+                    }
+                    
+                }
+
+                if ($this->settings->passwordForcePolicy && ($user->newPassword || strlen($user->newPassword) >= 0))
+                {
+
+                    $errors = $this->emailPassword->checkPasswordPolicy($user->newPassword);
+
+                    if ($errors)
                     {
 
-                        $errors = $this->emailPassword->checkBurnerEmail($user->email);
+                        $event->isValid = 0;
 
                         foreach ($errors as $error) {
-                            $user->addError('email', $error);
-                        }
-                        
-                    }
-
-                    if ($this->settings->passwordForcePolicy && ($user->newPassword || strlen($user->newPassword) >= 0))
-                    {
-
-                        $errors = $this->emailPassword->checkPasswordPolicy($user->newPassword);
-
-                        if ($errors)
-                        {
-
-                            $event->isValid = 0;
-
-                            foreach ($errors as $error) {
-                                $user->addError('newPassword', $error);
-                            }    
-
-                        }
+                            $user->addError('newPassword', $error);
+                        }    
 
                     }
 

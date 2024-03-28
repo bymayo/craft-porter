@@ -1,5 +1,12 @@
 # Porter Changelog
 
+## 1.0.4 - 2024-03-28
+### Fixed
+- Blank errors appearing when matching password rules
+
+### Added
+- Passwords changed in the CP now go through the password rules
+
 ## 1.0.3 - 2022-08-23
 ### Added
 - `porter.php` config file example.
