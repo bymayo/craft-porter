@@ -26,7 +26,8 @@
     },
     "require-dev": {
         "vlucas/phpdotenv": "^3.0",
-        "craftcms/rector": "dev-main"
+        "craftcms/rector": "dev-main",
+        "craftcms/phpstan": "dev-main"
     },
     "autoload": {
         "psr-4": {
