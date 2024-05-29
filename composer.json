@@ -2,7 +2,7 @@
     "name": "bymayo/porter",
     "description": "A toolkit with lots of helpers for users and accounts",
     "type": "craft-plugin",
-    "version": "1.0.4",
+    "version": "5.0.0",
     "keywords": [
         "craft",
         "cms",
@@ -11,7 +11,7 @@
         "porter"
     ],
     "support": {
-        "docs": "https://github.com/bymayo/craft-porter/blob/craft-4/README.md",
+        "docs": "https://github.com/bymayo/craft-porter/blob/craft-5/README.md",
         "issues": "https://github.com/bymayo/craft-porter/issues"
     },
     "license": "MIT",
@@ -22,7 +22,7 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^4.0.0"
+        "craftcms/cms": "^5.0.0"
     },
     "require-dev": {
         "vlucas/phpdotenv": "^3.0",
@@ -39,8 +39,8 @@
         "handle": "porter",
         "developer": "ByMayo",
         "developerUrl": "https://bymayo.co.uk",
-        "documentationUrl": "https://github.com/bymayo/craft-porter/blob/craft-4/README.md",
-        "changelogUrl": "https://raw.githubusercontent.com/bymayo/craft-porter/craft-4/CHANGELOG.md",
+        "documentationUrl": "https://github.com/bymayo/craft-porter/blob/craft-5/README.md",
+        "changelogUrl": "https://raw.githubusercontent.com/bymayo/craft-porter/craft-5/CHANGELOG.md",
         "components": {
             "porterService": "bymayo\\porter\\services\\PorterService"
         },
