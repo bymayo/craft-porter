@@ -1,5 +1,9 @@
 # Porter Changelog
 
+## 5.0.0 - 2024-05-30
+### Changed
+- Craft 5 compatibility
+
 ## 1.0.4 - 2024-03-28
 ### Fixed
 - Blank errors appearing when matching password rules
