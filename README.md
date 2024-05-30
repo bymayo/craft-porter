@@ -1,10 +1,10 @@
-<img src="https://github.com/bymayo/craft-porter/blob/craft-4/resources/icon.png" width="60">
+<img src="https://github.com/bymayo/craft-porter/blob/craft-5/resources/icon.png" width="60">
 
-# Porter for Craft CMS 4
+# Porter for Craft CMS 5
 
 Porter is a Craft CMS plugin that is the missing toolbox for all things users.
 
-<img src="https://raw.githubusercontent.com/bymayo/craft-porter/craft-4/resources/screenshot.png" width="850">
+<img src="https://raw.githubusercontent.com/bymayo/craft-porter/craft-5/resources/screenshot.png" width="850">
 
 ## Features
 
@@ -41,8 +41,8 @@ You can also install the plugin via the Plugin Store in the Craft Admin CP by se
 
 ## Requirements
 
-- Craft CMS 4.x
-- PHP 8.1
+- Craft CMS 5.x
+- PHP 8.2
 - MySQL (No PostgreSQL support)
 
 ## How to use
