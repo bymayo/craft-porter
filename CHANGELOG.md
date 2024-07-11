@@ -1,5 +1,9 @@
 # Porter Changelog
 
+## 5.0.2 - 2024-07-11
+### Fixed
+- If password field is blank when saving a user in the CP, skip password validation
+
 ## 5.0.1 - 2024-05-30
 ### Changed
 - Icon to a new shiny (literally) icon

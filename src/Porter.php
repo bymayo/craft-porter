@@ -191,7 +191,7 @@ class Porter extends Plugin
                     
                 }
 
-                if ($this->settings->passwordForcePolicy && ($user->newPassword || strlen($user->newPassword) >= 0))
+                if ($this->settings->passwordForcePolicy && ($user->newPassword || strlen($user->newPassword) > 0))
                 {
 
                     $errors = $this->emailPassword->checkPasswordPolicy($user->newPassword);
