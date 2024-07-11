@@ -1,5 +1,12 @@
 # Porter Changelog
 
+## 1.0.5 - 2024-07-11
+### Fixed
+- If password field is blank when saving a user in the CP, skip password validation
+
+### Added
+- New icon ✨
+
 ## 1.0.4 - 2024-03-28
 ### Fixed
 - Blank errors appearing when matching password rules
