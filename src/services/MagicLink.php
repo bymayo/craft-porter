@@ -193,7 +193,7 @@ class MagicLink extends Component
 
         $this->invalidateTokens($user);
 
-        if (DateTimeHelper::currentTimeStamp() <= (strtotime($query->dateCreated) + $this->settings->magicLinkExpirySeconds))
+        if (DateTimeHelper::currentTimeStamp() <= (DateTimeHelper::toDateTime($query->dateCreated)->format('U') + $this->settings->magicLinkExpirySeconds))
         {
 
             if (Craft::$app->getUser()->login($user))
