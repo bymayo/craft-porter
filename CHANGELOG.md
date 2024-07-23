@@ -1,5 +1,9 @@
 # Porter Changelog
 
+## 1.0.6 - 2024-07-23
+### Fixed
+- Magic link expiring in certain timezones (Thanks [@RobinWissink[](https://github.com/bymayo/craft-porter/issues/5))
+
 ## 1.0.5 - 2024-07-11
 ### Fixed
 - If password field is blank when saving a user in the CP, skip password validation
