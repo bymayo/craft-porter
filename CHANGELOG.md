@@ -1,5 +1,9 @@
 # Porter Changelog
 
+## 5.0.4 - 2024-02-14
+### Fixed
+- Magic link not working for users without CP access, if CP control panel access setting was disabled (Thanks [@StuartMcD[](https://github.com/bymayo/craft-porter/issues/10))
+
 ## 5.0.3 - 2024-07-23
 ### Fixed
 - Magic link expiring in certain timezones (Thanks [@RobinWissink[](https://github.com/bymayo/craft-porter/issues/5))

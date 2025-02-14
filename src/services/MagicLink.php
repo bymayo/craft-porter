@@ -115,6 +115,16 @@ class MagicLink extends Component
                 return true;
             }
 
+            if ($request->getAcceptsJson()) 
+            {
+                return $this->asJson([
+                    'success' => true,
+                    'message' => Craft::t('porter', 'porter_magic_link_failed')
+                ]);
+            }
+
+            Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_failed'));
+
         }
 
    }
@@ -140,40 +150,38 @@ class MagicLink extends Component
    public function createToken($user)
    {
 
-        if ($user && !$user->admin && (!$this->settings->magicLinkControlPanel && !$user->can('accessCp') || $this->settings->magicLinkControlPanel && $user->can('accessCp')))
+        if (!$user || $user && $user->admin || $user && $this->settings->magicLinkControlPanel == false && $user->can('accessCp'))
         {
+            return false;
+        }
 
-            $this->invalidateTokens($user);
+        $this->invalidateTokens($user);
 
-            $record = new MagicLinkRecord();
-            $record->userId = $user->id;
-            $record->token = Craft::$app->getSecurity()->generateRandomString(64);
+        $record = new MagicLinkRecord();
+        $record->userId = $user->id;
+        $record->token = Craft::$app->getSecurity()->generateRandomString(64);
 
-            $db = Craft::$app->getDb();
-            $transaction = $db->beginTransaction();
+        $db = Craft::$app->getDb();
+        $transaction = $db->beginTransaction();
 
-            try {
+        try {
 
-                $success = $record->save(false);
+            $success = $record->save(false);
 
-                if ($success) {
+            if ($success) {
 
-                    $transaction->commit();
+                $transaction->commit();
 
-                    return $record->token;
-
-                }
-
-            } catch (\Throwable $e) {
-
-                $transaction->rollBack();
-                throw $e;
+                return $record->token;
 
             }
 
-        }
+        } catch (\Throwable $e) {
 
-        return false;
+            $transaction->rollBack();
+            throw $e;
+
+        }
 
    }
 
