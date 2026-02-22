@@ -10,10 +10,10 @@ use craft\web\Controller;
 class DeactivateAccountController extends Controller
 {
 
-    protected array|int|bool $allowAnonymous = ['index'];
-
     public function actionIndex()
     {
+
+         $this->requirePostRequest();
 
          $action = Porter::getInstance()->deactivateAccount->deactivateAccount();
 

@@ -41,12 +41,12 @@ class EmailPassword extends Component
          }
       }
 
-      if (strlen($password) <= $this->settings->passwordForcePolicyMin)
+      if (strlen($password) < $this->settings->passwordForcePolicyMin)
       {
          $errors[] = Craft::t('porter', 'Password must contain at least {min} characters.', ['min' => $this->settings->passwordForcePolicyMin]);
       }
 
-      if (strlen($password) <= $this->settings->passwordForcePolicyMin && strlen($password) >= $this->settings->passwordForcePolicyMax)
+      if (strlen($password) > $this->settings->passwordForcePolicyMax)
       {
          $errors[] = Craft::t('porter', 'Password must be less than {max} characters.', ['max' => $this->settings->passwordForcePolicyMax]);
       }
@@ -110,20 +110,31 @@ class EmailPassword extends Component
       curl_setopt($ch, CURLOPT_URL, 'https://verifier.meetchopra.com/verify/'. $email .'?token='. $settings->emailsBurnersVerifierApiKey);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
+      curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+      curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+
       $result = curl_exec($ch);
-      
+
       if (curl_errno($ch)) {
-         echo 'Error:'. curl_error($ch);
+         Craft::error('Porter email verifier error: ' . curl_error($ch), __METHOD__);
+         curl_close($ch);
+         return false;
       }
-      
-      curl_close ($ch);
+
+      curl_close($ch);
+
+      $data = json_decode($result, true);
+
+      if (!is_array($data)) {
+         Craft::error('Porter email verifier returned invalid response', __METHOD__);
+         return false;
+      }
 
       if ($details) {
-         return json_decode($result, true);
-      } else {
-         $data = json_decode($result, true);
-         return $data['status'];
+         return $data;
       }
+
+      return $data['status'] ?? false;
 
    }
 

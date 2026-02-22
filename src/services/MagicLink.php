@@ -87,9 +87,9 @@ class MagicLink extends Component
 
             $email = $request->getBodyParam('email');
 
-            $user = Craft::$app->getUsers()->getUserByUsernameOrEmail($email);
+            $user = $email ? Craft::$app->getUsers()->getUserByUsernameOrEmail($email) : null;
 
-            $token = $this->createToken($user);
+            $token = $user ? $this->createToken($user) : false;
 
             if ($token)
             {
@@ -198,6 +198,12 @@ class MagicLink extends Component
     {
 
         $user = Craft::$app->users->getUserById($query->userId);
+
+        if (!$user) {
+            $query->delete();
+            Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_token_expired'));
+            return;
+        }
 
         $this->invalidateTokens($user);
 

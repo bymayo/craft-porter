@@ -1,5 +1,23 @@
 # Porter Changelog
 
+## 5.1.0 - 2026-02-22
+
+> [!WARNING]
+> If you copied the deactivate account template into your project, you'll need to update it to use a `<form>` with a POST request instead of a plain `<a>` link. See `deactivateAccountForm.twig` for the updated markup.
+
+### Fixed
+- Password maximum length rule was never being applied
+- Magic link request could error if the email address didn't belong to any user
+- Magic link could error if the user account was deleted after the link was sent
+- Deactivate account action was not protected against cross-site request forgery (CSRF)
+- Email verifier API errors were being output directly instead of being logged
+- Email verifier API could hang indefinitely if the service was unresponsive
+- Email verifier could error if the service returned an unexpected response
+
+### Changed
+- Deactivate account form now uses a proper form submission instead of a plain link
+- Added a database index on magic link tokens for faster lookups
+
 ## 5.0.4 - 2024-02-14
 ### Fixed
 - Magic link not working for users without CP access, if CP control panel access setting was disabled (Thanks [@StuartMcD[](https://github.com/bymayo/craft-porter/issues/10))

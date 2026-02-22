@@ -8,8 +8,16 @@
         </div>
     {% endif %}
 
-    <a href="{{ actionUrl('porter/deactivate-account') }}" class="{{ buttonClass }}" onclick="return confirm('{{ 'Deactivating your account results in you not being able to sign in. Are you sure you want to continue?'|t }}')">
-        {{ buttonText }}
-    </a>
+    <form method="post" accept-charset="UTF-8">
+
+        {{ csrfInput() }}
+        {{ actionInput('porter/deactivate-account') }}
+        {{ redirectInput(redirect) }}
+
+        <button type="submit" class="{{ buttonClass }}" onclick="return confirm('{{ 'Deactivating your account results in you not being able to sign in. Are you sure you want to continue?'|t }}')">
+            {{ buttonText }}
+        </button>
+
+    </form>
 
 {% endif %}

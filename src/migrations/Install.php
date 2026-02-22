@@ -79,12 +79,16 @@ class Install extends Migration
             true
         );
 
-        switch ($this->driver) {
-            case DbConfig::DRIVER_MYSQL:
-                break;
-            case DbConfig::DRIVER_PGSQL:
-                break;
-        }
+        $this->createIndex(
+            $this->db->getIndexName(
+                '{{%porter_magiclink}}',
+                'token',
+                true
+            ),
+            '{{%porter_magiclink}}',
+            'token',
+            true
+        );
     }
 
     protected function addForeignKeys()
