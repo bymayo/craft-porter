@@ -4,6 +4,8 @@
 
 ### Fixed
 - Delete account and magic link forms now return proper JSON responses when called via AJAX ([#11](https://github.com/bymayo/craft-porter/pull/11))
+- Error when enabling password policy but not selecting any rules ([#8](https://github.com/bymayo/craft-porter/issues/8))
+- Password policy and email validation errors now also output as flash messages ([#9](https://github.com/bymayo/craft-porter/issues/9))
 
 ## 5.1.2 - 2026-02-22
 

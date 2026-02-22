@@ -23,6 +23,11 @@ class EmailPassword extends Component
 
       $errors = [];
 
+      if (empty($this->settings->passwordForcePolicyRules))
+      {
+         return $errors;
+      }
+
       foreach ($this->settings->passwordForcePolicyRules as $rule)
       {
          switch ($rule) {

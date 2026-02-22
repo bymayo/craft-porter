@@ -194,7 +194,12 @@ class Porter extends Plugin
                     foreach ($errors as $error) {
                         $user->addError('email', $error);
                     }
-                    
+
+                    if ($errors)
+                    {
+                        Craft::$app->getSession()->setFlash('porter', implode(' ', $errors));
+                    }
+
                 }
 
                 if ($this->settings->passwordForcePolicy && ($user->newPassword || strlen($user->newPassword) > 0))
@@ -209,7 +214,9 @@ class Porter extends Plugin
 
                         foreach ($errors as $error) {
                             $user->addError('newPassword', $error);
-                        }    
+                        }
+
+                        Craft::$app->getSession()->setFlash('porter', implode(' ', $errors));
 
                     }
 
