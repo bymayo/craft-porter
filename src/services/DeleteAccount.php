@@ -82,7 +82,7 @@ class DeleteAccount extends Component
 
          $currentUser = Craft::$app->getUser()->getIdentity();
 
-         if ($currentUser)
+         if ($currentUser && $confirmationField && isset($currentUser->$confirmationField))
          {
             return $currentUser->$confirmationField;
          }

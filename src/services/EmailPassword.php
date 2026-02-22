@@ -27,16 +27,20 @@ class EmailPassword extends Component
       {
          switch ($rule) {
             case 'lowercase':
-               is_null($this->containsLowercase($password)) ?: $errors[] = $this->containsLowercase($password);
+               $error = $this->containsLowercase($password);
+               if ($error) { $errors[] = $error; }
                break;
             case 'uppercase':
-               is_null($this->containsUppercase($password)) ?: $errors[] = $this->containsUppercase($password);
+               $error = $this->containsUppercase($password);
+               if ($error) { $errors[] = $error; }
                break;
             case 'numeric':
-               is_null($this->containsNumeric($password)) ?: $errors[] = $this->containsNumeric($password);
+               $error = $this->containsNumeric($password);
+               if ($error) { $errors[] = $error; }
                break;
             case 'symbol':
-               is_null($this->containsSymbol($password)) ?: $errors[] = $this->containsSymbol($password);
+               $error = $this->containsSymbol($password);
+               if ($error) { $errors[] = $error; }
                break;
          }
       }

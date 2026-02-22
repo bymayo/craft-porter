@@ -42,13 +42,6 @@ class DeactivateAccount extends Component
             Craft::$app->request->getIsSiteRequest()
       ) {
 
-         $defaultProperties = array(
-            'redirect' => $this->settings->deactivateAccountRedirect,
-            'alertClass' => 'porter__alert',
-            'buttonClass' => 'porter__button',
-            'buttonText' => 'Deactivate Account'
-         );
-
          $properties = $properties ? array_merge($this->defaultTemplateProperties, $properties) : $this->defaultTemplateProperties;
 
          // Porter::log(print_r($properties, TRUE));

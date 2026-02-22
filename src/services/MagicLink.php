@@ -49,16 +49,6 @@ class MagicLink extends Component
              Craft::$app->request->getIsSiteRequest()
        ) {
  
-          $defaultProperties = array(
-             'redirect' => $this->settings->magicLinkRedirect,
-             'alertClass' => 'porter__alert',
-             'fieldContainerClass' => 'porter__field-container',
-             'fieldLabelClass' => 'porter__field-label',
-             'fieldClass' => 'porter__field',
-             'buttonClass' => 'porter__button',
-             'buttonText' => 'Send Magic Link',
-          );
- 
           $properties = $properties ? array_merge($this->defaultTemplateProperties, $properties) : $this->defaultTemplateProperties;
  
           // Porter::log(print_r($properties, TRUE));
@@ -115,10 +105,10 @@ class MagicLink extends Component
                 return true;
             }
 
-            if ($request->getAcceptsJson()) 
+            if ($request->getAcceptsJson())
             {
                 return $this->asJson([
-                    'success' => true,
+                    'success' => false,
                     'message' => Craft::t('porter', 'porter_magic_link_failed')
                 ]);
             }
@@ -150,7 +140,7 @@ class MagicLink extends Component
    public function createToken($user)
    {
 
-        if (!$user || $user && $user->admin || $user && $this->settings->magicLinkControlPanel == false && $user->can('accessCp'))
+        if (!$user || $user->admin || (!$this->settings->magicLinkControlPanel && $user->can('accessCp')))
         {
             return false;
         }

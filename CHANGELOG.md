@@ -1,5 +1,15 @@
 # Porter Changelog
 
+## 5.1.1 - 2026-02-22
+
+### Fixed
+- Magic link JSON response incorrectly returned success when it failed
+- Password policy checks were running each rule twice unnecessarily
+- Delete account confirmation field could error if the field name was invalid
+
+### Changed
+- Logging now uses Craft's built-in Monolog logger instead of a custom log file
+
 ## 5.1.0 - 2026-02-22
 
 > [!WARNING]

@@ -27,9 +27,10 @@ use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterEmailMessagesEvent;
-use craft\helpers\FileHelper;
 use craft\elements\User;
+use craft\log\MonologTarget;
 
+use Psr\Log\LogLevel;
 use yii\base\Event;
 use yii\base\ModelEvent;
 
@@ -66,14 +67,19 @@ class Porter extends Plugin
 
     public static function log($message)
     {
-        $file = Craft::getAlias('@storage/logs/porter.log');
-        $log = date('Y-m-d H:i:s'). ' ' . $message . "\n";
-        FileHelper::writeToFile($file, $log, ['append' => true]);
+        Craft::info($message, 'porter');
+    }
+
+    public static function warn($message)
+    {
+        Craft::warning($message, 'porter');
     }
 
     public function init()
     {
         parent::init();
+
+        $this->_registerLogTarget();
 
         self::$plugin = $this;
 
@@ -220,6 +226,17 @@ class Porter extends Plugin
     protected function createSettingsModel(): ?\craft\base\Model
     {
         return new Settings();
+    }
+
+    private function _registerLogTarget(): void
+    {
+        Craft::getLogger()->dispatcher->targets[] = new MonologTarget([
+            'name' => 'porter',
+            'categories' => ['porter'],
+            'level' => LogLevel::INFO,
+            'logContext' => false,
+            'allowLineBreaks' => false,
+        ]);
     }
 
 }
