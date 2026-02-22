@@ -37,7 +37,7 @@ class Helper extends Component
 
         } catch (\Throwable $e) {
 
-            Porter::log('[Notify] Error sending notification: ' . $e->getMessage());
+            Porter::warn('[Notify] Error sending notification: ' . $e->getMessage());
 
         }
 

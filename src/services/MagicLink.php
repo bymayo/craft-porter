@@ -50,9 +50,7 @@ class MagicLink extends Component
        ) {
  
           $properties = $properties ? array_merge($this->defaultTemplateProperties, $properties) : $this->defaultTemplateProperties;
- 
-          // Porter::log(print_r($properties, TRUE));
- 
+
           $view = Craft::$app->getView();
  
           $templatePath = $view->getTemplatesPath();

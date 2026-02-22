@@ -1,5 +1,10 @@
 # Porter Changelog
 
+## 5.1.2 - 2026-02-22
+
+### Changed
+- Removed leftover debug code and unused imports
+
 ## 5.1.1 - 2026-02-22
 
 ### Fixed
