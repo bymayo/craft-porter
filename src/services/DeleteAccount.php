@@ -106,10 +106,10 @@ class DeleteAccount extends Component
 
                if ($request->getAcceptsJson()) 
                {
-                  return $this->asJson([
+                  return [
                      'success' => false,
                      'message' => Craft::t('porter', 'porter_delete_account_flash_admins')
-                  ]);
+                  ];
                }
 
                Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_delete_account_flash_admins'));
@@ -148,10 +148,10 @@ class DeleteAccount extends Component
 
                   if ($request->getAcceptsJson()) 
                   {
-                     return $this->asJson([
+                     return [
                         'success' => true,
                         'message' => Craft::t('porter', 'porter_delete_account_flash_success')
-                     ]);
+                     ];
                   }
 
                   Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_delete_account_flash_success'));
@@ -164,10 +164,10 @@ class DeleteAccount extends Component
 
             if ($request->getAcceptsJson()) 
             {
-               return $this->asJson([
+               return [
                   'success' => false,
                   'message' => Craft::t('porter', 'porter_delete_account_flash_incorrect')
-               ]);
+               ];
             }
 
             Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_delete_account_flash_incorrect'));
@@ -179,12 +179,12 @@ class DeleteAccount extends Component
 
          if ($request->getAcceptsJson()) 
          {
-            return $this->asJson([
+            return [
                'success' => false,
                'message' => Craft::t('porter', 'porter_delete_account_flash_permission')
-            ]);
+            ];
          }
-         
+
          Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_delete_account_flash_permission'));
 
       }

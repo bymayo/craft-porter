@@ -1,5 +1,10 @@
 # Porter Changelog
 
+## 5.1.3 - 2026-02-22
+
+### Fixed
+- Delete account and magic link forms now return proper JSON responses when called via AJAX ([#11](https://github.com/bymayo/craft-porter/pull/11))
+
 ## 5.1.2 - 2026-02-22
 
 ### Changed

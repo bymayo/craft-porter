@@ -91,12 +91,12 @@ class MagicLink extends Component
                     )
                 );
 
-                if ($request->getAcceptsJson()) 
+                if ($request->getAcceptsJson())
                 {
-                   return $this->asJson([
+                   return [
                       'success' => true,
                       'message' => Craft::t('porter', 'porter_magic_link_sent')
-                   ]);
+                   ];
                 }
  
                 Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_sent'));
@@ -105,10 +105,10 @@ class MagicLink extends Component
 
             if ($request->getAcceptsJson())
             {
-                return $this->asJson([
+                return [
                     'success' => false,
                     'message' => Craft::t('porter', 'porter_magic_link_failed')
-                ]);
+                ];
             }
 
             Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_failed'));

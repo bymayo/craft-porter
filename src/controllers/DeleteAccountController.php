@@ -19,7 +19,14 @@ class DeleteAccountController extends Controller
 
          $request = Craft::$app->getRequest();
 
-         if (Porter::getInstance()->deleteAccount->deleteAccount($request))
+         $action = Porter::getInstance()->deleteAccount->deleteAccount($request);
+
+         if (is_array($action))
+         {
+            return $this->asJson($action);
+         }
+
+         if ($action)
          {
             return $this->redirectToPostedUrl();
          }

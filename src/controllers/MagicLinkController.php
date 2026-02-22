@@ -20,7 +20,14 @@ class MagicLinkController extends Controller
 
       $request = Craft::$app->getRequest();
 
-      if (Porter::getInstance()->magicLink->request($request))
+      $action = Porter::getInstance()->magicLink->request($request);
+
+      if (is_array($action))
+      {
+         return $this->asJson($action);
+      }
+
+      if ($action)
       {
          return $this->redirectToPostedUrl();
       }
