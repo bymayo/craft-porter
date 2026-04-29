@@ -1,5 +1,12 @@
 # Porter Changelog
 
+## 5.2.0 - 2026-04-29
+
+### Added
+- Email Notifications: send a Welcome email to users when their account is activated (by the user or an admin)
+- New `Email Notifications` settings tab with a toggle to enable/disable each notification
+- New `porter_welcome_email` system message, editable under `Settings > System Messages`
+
 ## 5.1.3 - 2026-02-22
 
 ### Fixed

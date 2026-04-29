@@ -43,6 +43,10 @@ class Settings extends Model
 
     public $deactivateAccountDeleteDays = 30;
 
+    // Welcome Email
+
+    public $emailWelcome = 0;
+
     // Magic Link
 
     public $magicLink = 0;
@@ -80,6 +84,7 @@ class Settings extends Model
                     'deleteAccountConfirmationEmail', 
                     'deactivateAccount',
                     'deactivateAccountConfirmationEmail',
+                    'emailWelcome',
                     'magicLink',
                     'magicLinkControlPanel', 
                     'magicLinkFrontEnd', 

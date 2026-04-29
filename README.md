@@ -30,6 +30,10 @@ Porter is a Craft CMS plugin that is the missing toolbox for all things users.
     - Lower case (a-z) and upper case rules (A-Z)
     - Numeric character rules (0-9)
     - Symbol rules (@,#,$ etc)
+- [Email Notifications](#email-notifications)
+    - Send a Welcome email when a user account is activated (by the user or an admin)
+    - Each email can be toggled on/off in the plugin settings
+    - All email content is editable under `Settings > System Messages`
 
 ## Install
 
@@ -272,6 +276,16 @@ With this method, you can also get the default template properties by using `cra
 Block disposable and invalid emails to reduce spam sign ups. To enable this go to `Settings > Porter` and toggle the `Block Burner / Disposable Emails` field.
 
 You will need to register at  https://verifier.meetchopra.com/ to get a __FREE__ API key.
+
+### Email Notifications
+
+Send transactional emails to users at key moments. To enable, go to `Settings > Porter > Email Notifications` and toggle the emails you want to send.
+
+Available emails:
+
+- **Welcome Email** — sent when a user account is activated, whether the user activates it themselves via the verification email or an admin activates it from the control panel.
+
+The content of each email (heading, subject, body) can be edited under `Settings > System Messages` in the control panel. The user being emailed is available in the template as `{{ user }}` (e.g. `{{ user.friendlyName }}`, `{{ user.email }}`).
 
 ## Support
 

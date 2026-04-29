@@ -29,12 +29,19 @@ return [
     'porter_magic_link_email_heading' => 'When a user requests a magic link to login.',
     'porter_magic_link_email_subject' => 'Your magic link request.',
     'porter_magic_link_email_body' => 'Hey {{ user.friendlyName }},
-    
-    You asked us to send you a magic link so you can quickly sign in securely. 
+
+    You asked us to send you a magic link so you can quickly sign in securely.
 
     {{link}}
 
     The link above is a magic link, only meant for you. Please don\'t share it with anyone.
 
-    If you weren’t expecting this email, just ignore it.'
+    If you weren’t expecting this email, just ignore it.',
+    'porter_welcome_email_heading' => 'When a user activates their account.',
+    'porter_welcome_email_subject' => 'Welcome!',
+    'porter_welcome_email_body' => 'Hey {{ user.friendlyName }},
+
+    Welcome aboard! Your account has been activated and you’re all set to go.
+
+    If you have any questions, just reply to this email and we’ll be happy to help.'
 ];

@@ -15,6 +15,7 @@ use bymayo\porter\services\MagicLink;
 use bymayo\porter\services\EmailPassword;
 use bymayo\porter\services\DeactivateAccount;
 use bymayo\porter\services\DeleteAccount;
+use bymayo\porter\services\EmailNotifications;
 use bymayo\porter\variables\PorterVariable;
 use bymayo\porter\models\Settings;
 
@@ -22,7 +23,9 @@ use Craft;
 use craft\base\Plugin;
 use craft\services\Plugins;
 use craft\services\SystemMessages;
+use craft\services\Users;
 use craft\events\PluginEvent;
+use craft\events\UserEvent;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use craft\events\RegisterUrlRulesEvent;
@@ -118,7 +121,8 @@ class Porter extends Plugin
             'magicLink' => MagicLink::class,
             'deleteAccount' => DeleteAccount::class,
             'deactivateAccount' => DeactivateAccount::class,
-            'emailPassword' => EmailPassword::class
+            'emailPassword' => EmailPassword::class,
+            'emailNotifications' => EmailNotifications::class
         ]);
 
         Event::on(
@@ -172,10 +176,24 @@ class Porter extends Plugin
                             'heading' => Craft::t('porter', 'porter_magic_link_email_heading'),
                             'subject' => Craft::t('porter', 'porter_magic_link_email_subject'),
                             'body' => Craft::t('porter', 'porter_magic_link_email_body')
+                        ],
+                        [
+                            'key' => 'porter_welcome_email',
+                            'heading' => Craft::t('porter', 'porter_welcome_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_welcome_email_subject'),
+                            'body' => Craft::t('porter', 'porter_welcome_email_body')
                         ]
                     ]
                 );
 
+            }
+        );
+
+        Event::on(
+            Users::class,
+            Users::EVENT_AFTER_ACTIVATE_USER,
+            function (UserEvent $event) {
+                Porter::getInstance()->emailNotifications->sendWelcome($event->user);
             }
         );
 

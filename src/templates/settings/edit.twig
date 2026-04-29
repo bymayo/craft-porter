@@ -10,20 +10,24 @@
 
 {% set tabs = {
     delete: {
-        label: 'Delete Account', 
+        label: 'Delete Account',
         url: '#delete'
     },
     deactivate: {
-        label: 'Deactivate Account', 
+        label: 'Deactivate Account',
         url: '#deactivate'
     },
     magicLink: {
-        label: 'Magic Link', 
+        label: 'Magic Link',
         url: '#magic-link'
     },
     emailPassword: {
-        label: 'Email & Password', 
+        label: 'Email & Password',
         url: '#email-password'
+    },
+    emailNotifications: {
+        label: 'Email Notifications',
+        url: '#email-notifications'
     }
 } %}
 
@@ -262,6 +266,18 @@
             }) }}
 
         </div>
+
+    </div>
+
+    <div id="email-notifications" class="hidden">
+
+        {{ forms.lightswitchField({
+            label: 'Welcome Email',
+            instructions: 'Send a welcome email to users when their account is activated.',
+            id: 'emailWelcome',
+            name: 'settings[emailWelcome]',
+            on: settings['emailWelcome']
+        }) }}
 
     </div>
 

@@ -46,6 +46,9 @@ return [
     'passwordForcePolicy' => false,
     'passwordForcePolicyMin' => 8,
     'passwordForcePolicyMax' => 128,
-    'passwordForcePolicyRules' => null
-    
+    'passwordForcePolicyRules' => null,
+
+    // Email Notifications
+    'emailWelcome' => false
+
 ];
