@@ -61,7 +61,7 @@
             <div id="confirmationTypeKeyword"{% if settings['deleteAccountConfirmationType'] != 'confirmationKeyword' %} class="hidden"{% endif %}>
                 {{ forms.textField({
                     label: 'Confirmation Keyword',
-                    instructions: 'The word/phrase that is needed to confirm before the users account is deleted.',
+                    instructions: 'The word users must type to confirm deletion.',
                     id: 'deleteAccountConfirmationKeyword',
                     name: 'settings[deleteAccountConfirmationKeyword]',
                     value: settings['deleteAccountConfirmationKeyword']})
@@ -71,7 +71,7 @@
             <div id="confirmationTypeField"{% if settings['deleteAccountConfirmationType'] != 'confirmationField' %} class="hidden"{% endif %}>
                 {{ forms.selectField({
                     label: 'Confirmation Field',
-                    instructions: 'The field that is needed to confirm before the users account is deleted.',
+                    instructions: 'The user field that must match to confirm deletion.',
                     id: 'deleteAccountConfirmationField',
                     name: 'settings[deleteAccountConfirmationField]',
                     value: settings['deleteAccountConfirmationField'],
@@ -129,6 +129,41 @@
 
         </div>
 
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+
+        <h2>Inactive Account Cleanup</h2>
+
+        {{ forms.lightswitchField({
+            label: 'Automatically deactivate inactive accounts',
+            instructions: 'Warn and then deactivate accounts that haven’t signed in for a while. Admins and users with control panel access are skipped.',
+            id: 'inactiveAccountCleanup',
+            name: 'settings[inactiveAccountCleanup]',
+            on: settings['inactiveAccountCleanup'],
+            toggle: 'inactiveAccountCleanup-options'
+        }) }}
+
+        <div id="inactiveAccountCleanup-options">
+
+            {{ forms.textField({
+                label: 'Send reminder after',
+                instructions: 'Days of inactivity before the warning email is sent.',
+                id: 'inactiveAccountReminderDays',
+                name: 'settings[inactiveAccountReminderDays]',
+                value: settings['inactiveAccountReminderDays'],
+                size: 4
+            }) }}
+
+            {{ forms.textField({
+                label: 'Deactivate after',
+                instructions: 'Days of inactivity before the account is deactivated.',
+                id: 'inactiveAccountDeactivateDays',
+                name: 'settings[inactiveAccountDeactivateDays]',
+                value: settings['inactiveAccountDeactivateDays'],
+                size: 4
+            }) }}
+
+        </div>
+
     </div>
 
     <div id="login" class="hidden">
@@ -147,7 +182,7 @@
 
             {{ forms.lightswitchField({
                 label: 'Control Panel Access',
-                instructions: 'Enable Magic Link for users who have permission to access the CP.',
+                instructions: 'Enable Magic Link for users with CP access.',
                 id: 'magicLinkControlPanel',
                 name: 'settings[magicLinkControlPanel]',
                 on: settings['magicLinkControlPanel']
@@ -162,7 +197,7 @@
 
             {{ forms.textField({
                 label: 'Expiry Timeframe',
-                instructions: 'The number of seconds magic links take to expire.',
+                instructions: 'Seconds before a magic link expires.',
                 id: 'magicLinkExpirySeconds',
                 name: 'settings[magicLinkExpirySeconds]',
                 value: settings['magicLinkExpirySeconds']})
@@ -184,7 +219,7 @@
 
         {{ forms.textField({
             label: 'Threshold',
-            instructions: 'How many consecutive failed sign in attempts trigger the Failed Login Attempts notification email. Only used when that notification is enabled.',
+            instructions: 'Failed sign in attempts that trigger the notification email.',
             id: 'emailFailedLoginAttemptsThreshold',
             name: 'settings[emailFailedLoginAttemptsThreshold]',
             value: settings['emailFailedLoginAttemptsThreshold'],
@@ -269,7 +304,7 @@
 
         {{ forms.lightswitchField({
             label: 'Welcome Email',
-            instructions: 'Send a welcome email to users when their account is activated.',
+            instructions: 'Sent when a user’s account is activated.',
             id: 'emailWelcome',
             name: 'settings[emailWelcome]',
             on: settings['emailWelcome']
@@ -277,7 +312,7 @@
 
         {{ forms.lightswitchField({
             label: 'New Device Login Detected',
-            instructions: 'Notify users by email when a sign in is detected from a different IP address or device than their last sign in.',
+            instructions: 'Sent when a user signs in from a new IP or device.',
             id: 'emailNewDeviceLogin',
             name: 'settings[emailNewDeviceLogin]',
             on: settings['emailNewDeviceLogin']
@@ -285,7 +320,7 @@
 
         {{ forms.lightswitchField({
             label: 'Password Changed',
-            instructions: 'Notify users by email when their password is changed (by themselves, via password reset, or by an admin).',
+            instructions: 'Sent when a user’s password is changed.',
             id: 'emailPasswordChanged',
             name: 'settings[emailPasswordChanged]',
             on: settings['emailPasswordChanged']
@@ -293,7 +328,7 @@
 
         {{ forms.lightswitchField({
             label: 'Email Address Changed',
-            instructions: 'Notify users when their email address is changed. Sent to the user’s previous email address so they’re alerted if their account is compromised.',
+            instructions: 'Sent to a user’s previous address when their email is changed.',
             id: 'emailAddressChanged',
             name: 'settings[emailAddressChanged]',
             on: settings['emailAddressChanged']
@@ -301,7 +336,7 @@
 
         {{ forms.lightswitchField({
             label: 'Account Suspended',
-            instructions: 'Notify users when their account is suspended.',
+            instructions: 'Sent when a user’s account is suspended.',
             id: 'emailAccountSuspended',
             name: 'settings[emailAccountSuspended]',
             on: settings['emailAccountSuspended']
@@ -309,7 +344,7 @@
 
         {{ forms.lightswitchField({
             label: 'Account Restored',
-            instructions: 'Notify users when their suspended account is restored.',
+            instructions: 'Sent when a suspended account is restored.',
             id: 'emailAccountUnsuspended',
             name: 'settings[emailAccountUnsuspended]',
             on: settings['emailAccountUnsuspended']
@@ -317,7 +352,7 @@
 
         {{ forms.lightswitchField({
             label: 'Account Deactivated',
-            instructions: 'Notify users when their account is deactivated, regardless of who initiated it.',
+            instructions: 'Sent when a user’s account is deactivated.',
             id: 'emailAccountDeactivated',
             name: 'settings[emailAccountDeactivated]',
             on: settings['emailAccountDeactivated']
@@ -325,7 +360,7 @@
 
         {{ forms.lightswitchField({
             label: 'Account Deleted',
-            instructions: 'Notify users when their account is deleted, regardless of who initiated it.',
+            instructions: 'Sent when a user’s account is deleted.',
             id: 'emailAccountDeleted',
             name: 'settings[emailAccountDeleted]',
             on: settings['emailAccountDeleted']
@@ -333,10 +368,18 @@
 
         {{ forms.lightswitchField({
             label: 'Failed Login Attempts',
-            instructions: 'Notify users when multiple failed sign in attempts are detected on their account. The threshold is configured on the Login tab. The email is sent once when the threshold is crossed and won’t fire again until the failure count resets (e.g. after a successful sign in).',
+            instructions: 'Sent when consecutive failed sign in attempts cross the configured threshold.',
             id: 'emailFailedLoginAttempts',
             name: 'settings[emailFailedLoginAttempts]',
             on: settings['emailFailedLoginAttempts']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Inactive Account Reminder',
+            instructions: 'Sent when a user hasn’t signed in for a while, before their account is deactivated.',
+            id: 'emailInactiveAccountReminder',
+            name: 'settings[emailInactiveAccountReminder]',
+            on: settings['emailInactiveAccountReminder']
         }) }}
 
     </div>

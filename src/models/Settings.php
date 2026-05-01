@@ -37,6 +37,14 @@ class Settings extends Model
 
     public $deactivateAccountRedirect = '/';
 
+    // Inactive Accounts
+
+    public $inactiveAccountCleanup = 0;
+
+    public $inactiveAccountReminderDays = 365;
+
+    public $inactiveAccountDeactivateDays = 395;
+
     // Email Notifications
 
     public $emailWelcome = 0;
@@ -54,6 +62,8 @@ class Settings extends Model
     public $emailAccountDeactivated = 0;
 
     public $emailAccountDeleted = 0;
+
+    public $emailInactiveAccountReminder = 0;
 
     public $emailFailedLoginAttempts = 0;
 
@@ -102,13 +112,15 @@ class Settings extends Model
                     'emailAccountUnsuspended',
                     'emailAccountDeactivated',
                     'emailAccountDeleted',
+                    'emailInactiveAccountReminder',
                     'emailFailedLoginAttempts',
+                    'inactiveAccountCleanup',
                     'magicLink',
-                    'magicLinkControlPanel', 
-                    'magicLinkFrontEnd', 
-                    'emailBurners', 
+                    'magicLinkControlPanel',
+                    'magicLinkFrontEnd',
+                    'emailBurners',
                     'passwordForcePolicy'
-                ], 
+                ],
                 'boolean'
             ],
             [
@@ -116,7 +128,9 @@ class Settings extends Model
                     'magicLinkExpirySeconds',
                     'passwordForcePolicyMin',
                     'passwordForcePolicyMax',
-                    'emailFailedLoginAttemptsThreshold'
+                    'emailFailedLoginAttemptsThreshold',
+                    'inactiveAccountReminderDays',
+                    'inactiveAccountDeactivateDays'
                 ],
                 'integer'
             ],

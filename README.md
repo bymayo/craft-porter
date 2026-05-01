@@ -10,12 +10,13 @@ Porter is a Craft CMS plugin that is the missing toolbox for all things users.
 
 - [Delete Account](#delete-account)
     - Allow users to delete their account on the front end
-    - Optionally send a email confirmation of account deletion
     - Customisable "keyword" the user needs to type e.g. DELETE or a user field
-- [Deactivate Account](#deactivate-account) 
+- [Deactivate Account](#deactivate-account)
     - Allow users to deactivate their account on the front end
-    - Optionally send a email confirmation of account deactivation
-    - Deactivated users can optionally be deleted after X days
+- [Inactive Account Cleanup](#inactive-account-cleanup)
+    - Warn users by email after a configurable period of inactivity
+    - Auto-deactivate accounts that don't return after a longer threshold
+    - Admins and users with control panel access are always skipped
 - [Magic Link](#magic-link)
     - Let's users sign in via a link sent to their email inbox
     - Allow front end and/or control panel login via a link
@@ -31,13 +32,14 @@ Porter is a Craft CMS plugin that is the missing toolbox for all things users.
     - Numeric character rules (0-9)
     - Symbol rules (@,#,$ etc)
 - [Email Notifications](#email-notifications)
-    - Send a Welcome email when a user account is activated (by the user or an admin)
-    - Send a New Device Login email when a sign in is detected from a different IP address or device than the user's previous sign in
-    - Send a Password Changed email when a user's password is changed (self-service, via password reset, or by an admin)
-    - Send an Email Address Changed email to the user's previous email address when their email is changed
-    - Send Account Suspended / Account Restored emails when a user's account is suspended or unsuspended
-    - Send an Account Deleted email when a user's account is deleted (by an admin or any other path)
-    - Send a Failed Login Attempts email when consecutive failed sign ins on a user's account cross a configurable threshold
+    - Welcome email when a user account is activated
+    - New Device Login email when a sign in is detected from a new IP or device
+    - Password Changed email
+    - Email Address Changed email, sent to the user's previous address
+    - Account Suspended / Account Restored emails
+    - Account Deactivated / Account Deleted emails (fired on any path)
+    - Failed Login Attempts email when consecutive failures cross a configurable threshold
+    - Inactive Account Reminder email before automatic deactivation
     - Each email can be toggled on/off in the plugin settings
     - All email content is editable under `Settings > System Messages`
 
@@ -277,6 +279,22 @@ With this method, you can also get the default template properties by using `cra
 
 > ⚠️ Admin users CANNOT use magic links for security reasons
 
+### Inactive Account Cleanup
+
+Warn users who haven’t signed in for a while, then deactivate their account if they don’t return. To enable, go to `Settings > Porter > Account` and toggle `Automatically deactivate inactive accounts`. Configure how long before the warning email is sent and how long before the account is deactivated.
+
+The cleanup is driven by a console command, so you’ll need to schedule it via cron:
+
+```
+0 3 * * * cd /path/to/site && php craft porter/users/cleanup-inactive
+```
+
+Each run sends warning emails to users that have crossed the reminder threshold (once per inactive period — signing back in resets it) and deactivates accounts that have crossed the deactivate threshold. Deactivated users get the standard `Account Deactivated` notification if it’s enabled.
+
+> ⚠️ Admins and any user with control panel access are always skipped, regardless of how long they’ve been inactive.
+
+> ⚠️ Porter relies on Craft’s `lastLoginDate`. Users who have never signed in are not touched. If an admin reactivates a previously deactivated user, you may want to also clear or refresh their `lastLoginDate` — otherwise the next cron run will deactivate them again.
+
 ### Block Burner / Disposable Emails
 
 Block disposable and invalid emails to reduce spam sign ups. To enable this go to `Settings > Porter` and toggle the `Block Burner / Disposable Emails` field.
@@ -338,9 +356,8 @@ If you have any issues (Surely not!) then I'll aim to reply to these as soon as 
 
 ## Roadmap
 
-- Widgets, widgets, widgets! Who doesn't love widgets. 
+- Widgets, widgets, widgets! Who doesn't love widgets.
 - Transfer content option for deleted users
-- Console command for garbage collection on deactivated users 
 - User moderation
 - A cleaner/secure way of letting users choose member groups on sign up
 - More 2FA features (SMS, Auth apps etc)

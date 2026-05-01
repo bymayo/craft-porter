@@ -16,6 +16,7 @@ use bymayo\porter\services\EmailPassword;
 use bymayo\porter\services\DeactivateAccount;
 use bymayo\porter\services\DeleteAccount;
 use bymayo\porter\services\EmailNotifications;
+use bymayo\porter\services\InactiveAccounts;
 use bymayo\porter\variables\PorterVariable;
 use bymayo\porter\models\Settings;
 
@@ -59,7 +60,7 @@ class Porter extends Plugin
     /**
      * @var string
      */
-    public string $schemaVersion = '1.2.0';
+    public string $schemaVersion = '1.3.0';
 
     /**
      * @var bool
@@ -92,7 +93,11 @@ class Porter extends Plugin
 
         self::$plugin = $this;
 
-        $this->controllerNamespace = 'bymayo\porter\controllers';
+        if (Craft::$app instanceof \craft\console\Application) {
+            $this->controllerNamespace = 'bymayo\\porter\\console\\controllers';
+        } else {
+            $this->controllerNamespace = 'bymayo\\porter\\controllers';
+        }
 
         Event::on(
             CraftVariable::class,
@@ -128,7 +133,8 @@ class Porter extends Plugin
             'deleteAccount' => DeleteAccount::class,
             'deactivateAccount' => DeactivateAccount::class,
             'emailPassword' => EmailPassword::class,
-            'emailNotifications' => EmailNotifications::class
+            'emailNotifications' => EmailNotifications::class,
+            'inactiveAccounts' => InactiveAccounts::class
         ]);
 
         Event::on(
@@ -224,6 +230,12 @@ class Porter extends Plugin
                             'heading' => Craft::t('porter', 'porter_failed_login_attempts_email_heading'),
                             'subject' => Craft::t('porter', 'porter_failed_login_attempts_email_subject'),
                             'body' => Craft::t('porter', 'porter_failed_login_attempts_email_body')
+                        ],
+                        [
+                            'key' => 'porter_inactive_account_reminder_email',
+                            'heading' => Craft::t('porter', 'porter_inactive_account_reminder_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_inactive_account_reminder_email_subject'),
+                            'body' => Craft::t('porter', 'porter_inactive_account_reminder_email_body')
                         ]
                     ]
                 );

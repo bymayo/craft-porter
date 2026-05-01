@@ -80,6 +80,12 @@ class EmailNotifications extends Component
          return;
       }
 
+      if ($record->inactiveReminderSentAt)
+      {
+         $record->inactiveReminderSentAt = null;
+         $record->save();
+      }
+
       if ($record->ipHash === $ipHash && $record->uaHash === $uaHash)
       {
          return;
@@ -284,6 +290,27 @@ class EmailNotifications extends Component
          $user->email,
          array(
             'user' => $user,
+            'dateCreated' => new \DateTime()
+         )
+      );
+
+   }
+
+   public function sendInactiveAccountReminder(User $user, int $deactivateDays)
+   {
+
+      if (!$this->settings->emailInactiveAccountReminder || !$user->email)
+      {
+         return;
+      }
+
+      Porter::getInstance()->helper->notify(
+         'porter_inactive_account_reminder_email',
+         $user->email,
+         array(
+            'user' => $user,
+            'lastLoginDate' => $user->lastLoginDate,
+            'deactivateDays' => $deactivateDays,
             'dateCreated' => new \DateTime()
          )
       );

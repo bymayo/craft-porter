@@ -1,5 +1,13 @@
 # Porter Changelog
 
+## 5.2.1 - 2026-05-01
+
+### Added
+- Inactive Account Reminder email and `porter/users/cleanup-inactive` console command
+
+### Changed
+- Settings tabs reorganised, with section headings and action-style toggle labels
+
 ## 5.2.0 - 2026-05-01
 
 > [!WARNING]

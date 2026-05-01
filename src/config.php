@@ -28,6 +28,11 @@ return [
     'deactivateAccount' => false,
     'deactivateAccountRedirect' => '/',
 
+    // Inactive Accounts
+    'inactiveAccountCleanup' => false,
+    'inactiveAccountReminderDays' => 365,
+    'inactiveAccountDeactivateDays' => 395,
+
     // Magic Link
     'magicLink' => false,
     'magicLinkControlPanel' => false,
@@ -54,6 +59,7 @@ return [
     'emailAccountUnsuspended' => false,
     'emailAccountDeactivated' => false,
     'emailAccountDeleted' => false,
+    'emailInactiveAccountReminder' => false,
     'emailFailedLoginAttempts' => false,
     'emailFailedLoginAttemptsThreshold' => 3
 

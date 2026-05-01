@@ -116,5 +116,14 @@ return [
 
     If this was you, no further action is needed.
 
-    If you didn’t make these attempts, your account may be the target of a sign in attack. We recommend changing your password and contacting us if you’re unable to sign in yourself.'
+    If you didn’t make these attempts, your account may be the target of a sign in attack. We recommend changing your password and contacting us if you’re unable to sign in yourself.',
+    'porter_inactive_account_reminder_email_heading' => 'When a user hasn’t signed in for a while and is approaching automatic deactivation.',
+    'porter_inactive_account_reminder_email_subject' => 'Your account is inactive',
+    'porter_inactive_account_reminder_email_body' => 'Hey {{ user.friendlyName }},
+
+    We noticed you haven’t signed in for a while. To keep your account, sign in within the next {{ deactivateDays }} days, otherwise it will be deactivated automatically.
+
+    {% if user.lastLoginDate %}Last sign in: {{ user.lastLoginDate|date(\'F j, Y\') }}{% endif %}
+
+    If you no longer need this account you can ignore this email.'
 ];

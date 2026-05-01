@@ -71,8 +71,9 @@ class Install extends Migration
                 [
                     'id' => $this->primaryKey(),
                     'userId' => $this->integer()->notNull(),
-                    'ipHash' => $this->string(64)->notNull(),
-                    'uaHash' => $this->string(64)->notNull(),
+                    'ipHash' => $this->string(64),
+                    'uaHash' => $this->string(64),
+                    'inactiveReminderSentAt' => $this->dateTime(),
                     'dateCreated' => $this->dateTime()->notNull(),
                     'dateUpdated' => $this->dateTime()->notNull(),
                     'uid' => $this->uid()
