@@ -3,7 +3,8 @@
 ## 5.2.1 - 2026-05-01
 
 ### Added
-- Inactive Account Reminder email and `porter/users/cleanup-inactive` console command
+- Inactive Account Reminder email and `porter/users/cleanup-inactive` console command (defaults: warn after 365 days of inactivity, deactivate after 395)
+- Reactivating a user automatically clears their `lastLoginDate`, so the cleanup gives them a fresh inactivity clock
 
 ### Changed
 - Settings tabs reorganised, with section headings and action-style toggle labels

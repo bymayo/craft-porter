@@ -88,6 +88,24 @@ class InactiveAccounts extends Component
 
    }
 
+   public function resetLastLoginForUser(User $user): void
+   {
+
+      if ($user->id === null)
+      {
+         return;
+      }
+
+      Craft::$app->getDb()->createCommand()->update(
+         '{{%users}}',
+         ['lastLoginDate' => null],
+         ['id' => $user->id]
+      )->execute();
+
+      $user->lastLoginDate = null;
+
+   }
+
    private function _canAccessCp(User $user): bool
    {
       return $user->admin || $user->can('accessCp');

@@ -248,6 +248,7 @@ class Porter extends Plugin
             Users::EVENT_AFTER_ACTIVATE_USER,
             function (UserEvent $event) {
                 Porter::getInstance()->emailNotifications->sendWelcome($event->user);
+                Porter::getInstance()->inactiveAccounts->resetLastLoginForUser($event->user);
             }
         );
 

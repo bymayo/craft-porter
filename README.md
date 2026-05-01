@@ -32,14 +32,7 @@ Porter is a Craft CMS plugin that is the missing toolbox for all things users.
     - Numeric character rules (0-9)
     - Symbol rules (@,#,$ etc)
 - [Email Notifications](#email-notifications)
-    - Welcome email when a user account is activated
-    - New Device Login email when a sign in is detected from a new IP or device
-    - Password Changed email
-    - Email Address Changed email, sent to the user's previous address
-    - Account Suspended / Account Restored emails
-    - Account Deactivated / Account Deleted emails (fired on any path)
-    - Failed Login Attempts email when consecutive failures cross a configurable threshold
-    - Inactive Account Reminder email before automatic deactivation
+    - Transactional emails for key account events (sign in, password change, suspension, deletion, etc.)
     - Each email can be toggled on/off in the plugin settings
     - All email content is editable under `Settings > System Messages`
 
@@ -293,7 +286,7 @@ Each run sends warning emails to users that have crossed the reminder threshold 
 
 > ⚠️ Admins and any user with control panel access are always skipped, regardless of how long they’ve been inactive.
 
-> ⚠️ Porter relies on Craft’s `lastLoginDate`. Users who have never signed in are not touched. If an admin reactivates a previously deactivated user, you may want to also clear or refresh their `lastLoginDate` — otherwise the next cron run will deactivate them again.
+> ⚠️ Porter relies on Craft’s `lastLoginDate`. Users who have never signed in are not touched. When an admin reactivates a previously deactivated user, Porter clears their `lastLoginDate` so the cleanup won’t re-deactivate them — they get a fresh inactivity clock starting from their next sign in.
 
 ### Block Burner / Disposable Emails
 
@@ -303,22 +296,20 @@ You will need to register at  https://verifier.meetchopra.com/ to get a __FREE__
 
 ### Email Notifications
 
-Send transactional emails to users at key moments. To enable, go to `Settings > Porter > Email Notifications` and toggle the emails you want to send.
+Send transactional emails to users at key moments. To enable, go to `Settings > Porter > Notifications` and toggle the emails you want to send. Email content (heading, subject, body) is editable under `Settings > System Messages`.
 
-Available emails:
-
-- **Welcome Email** — sent when a user account is activated, whether the user activates it themselves via the verification email or an admin activates it from the control panel.
-- **New Device Login Detected** — sent when a user signs in from a different IP address or device than their previous sign in. Porter stores the last-known IP and user-agent hash per user; the very first sign in is silently seeded and does not trigger an email.
-- **Password Changed** — sent when a user’s password is changed. Fires for self-service changes from a user’s account page, password resets via email, and admin-initiated password changes from the control panel. Not sent when a brand new user is being created.
-- **Email Address Changed** — sent to the user’s **previous** email address when their email is changed. Sending to the previous address is intentional: if an account is compromised, the original owner gets alerted at the address they still have access to. Not sent when a brand new user is being created.
-- **Account Suspended** — sent when a user’s account is suspended (via the CP, console, or programmatically).
-- **Account Restored** — sent when a previously suspended account is unsuspended.
-- **Account Deleted** — sent when a user’s account is deleted, regardless of the path (admin action, self-service, console). If you also have the legacy `Delete Account → Send Confirmation Email` setting enabled, both emails will fire on Porter’s self-service delete form — leave one off to avoid duplicates.
-- **Failed Login Attempts** — sent when consecutive failed sign in attempts on a user’s account cross a configurable threshold (default 3). The email fires once when the threshold is crossed and won’t fire again until Craft resets the failure count (which happens on a successful sign in). Adjust the threshold under `Settings > Porter > Email Notifications`.
-
-The content of each email (heading, subject, body) can be edited under `Settings > System Messages` in the control panel. The user being emailed is available in the template as `{{ user }}` (e.g. `{{ user.friendlyName }}`, `{{ user.email }}`). The New Device Login email also has access to `{{ ipAddress }}`, `{{ userAgent }}` and `{{ dateCreated }}`. The Password Changed email has access to `{{ ipAddress }}` (when the change is made via a web request) and `{{ dateCreated }}`. The Email Address Changed email has access to `{{ oldEmail }}`, `{{ newEmail }}`, `{{ ipAddress }}` and `{{ dateCreated }}`. The Account Suspended, Restored and Deleted emails have access to `{{ dateCreated }}`. The Failed Login Attempts email has access to `{{ attempts }}`, `{{ threshold }}`, `{{ ipAddress }}` and `{{ dateCreated }}`.
-
-> ⚠️ Porter only stores the most recent sign in per user. If you alternate between two devices, expect a "new device" email each time you switch.
+| Email | Sent when |
+|---|---|
+| Welcome | A user’s account is activated. |
+| New Device Login Detected | A user signs in from a new IP or device. |
+| Password Changed | A user’s password is changed. |
+| Email Address Changed | A user’s email is changed (sent to the previous address). |
+| Account Suspended | A user’s account is suspended. |
+| Account Restored | A suspended account is restored. |
+| Account Deactivated | A user’s account is deactivated. |
+| Account Deleted | A user’s account is deleted. |
+| Failed Login Attempts | Consecutive failed sign in attempts cross the configured threshold. |
+| Inactive Account Reminder | A user hasn’t signed in for a while, before their account is deactivated. |
 
 #### Using Porter's basic HTML email template
 
@@ -337,18 +328,14 @@ Porter ships with a clean, responsive HTML email layout you can use as Craft's `
 
 Tweak the copied file (logo, colours, footer text) to match your brand — Porter won't overwrite it on plugin updates.
 
-> ⚠️ **New Device Login Detected — production setup**
+> ⚠️ **New Device Login Detected — behind a proxy?**
 >
-> If your site sits behind a reverse proxy, load balancer or CDN (nginx, Cloudflare, AWS ALB, etc.), `Craft::$app->getRequest()->getUserIP()` will return the proxy's IP for every user unless you tell Craft to trust forwarded headers. Without this, IP-based detection collapses to user-agent-only and the "new device" email becomes much less useful.
->
-> In `config/general.php`:
+> If your site sits behind a reverse proxy, load balancer or CDN, set the following in `config/general.php` so Craft picks up the real client IP:
 >
 > ```php
 > 'trustedHosts' => ['any'], // or restrict to your proxy's CIDR ranges
 > 'secureHeaders' => ['X-Forwarded-For', 'X-Forwarded-Host', 'X-Forwarded-Proto'],
 > ```
->
-> Locally, testing this email with a VPN won't work — your dev server is reached over loopback, so the perceived IP doesn't change. To verify it fires, scramble the stored hash in the database (`UPDATE porter_user_logins SET ipHash = 'fake' WHERE userId = <id>;`) and log in again, or test against a deployed environment.
 
 ## Support
 
