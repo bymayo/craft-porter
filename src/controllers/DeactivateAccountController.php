@@ -15,7 +15,14 @@ class DeactivateAccountController extends Controller
 
          $this->requirePostRequest();
 
-         $action = Porter::getInstance()->deactivateAccount->deactivateAccount();
+         $request = Craft::$app->getRequest();
+
+         $action = Porter::getInstance()->deactivateAccount->deactivateAccount($request);
+
+         if (is_array($action))
+         {
+            return $this->asJson($action);
+         }
 
          if ($action)
          {

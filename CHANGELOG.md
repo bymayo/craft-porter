@@ -1,5 +1,10 @@
 # Porter Changelog
 
+## 5.2.2 - 2026-05-01
+
+### Fixed
+- Deactivate account form now returns proper JSON responses when called via AJAX
+
 ## 5.2.1 - 2026-05-01
 
 ### Added

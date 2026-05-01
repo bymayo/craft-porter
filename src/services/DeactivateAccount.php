@@ -60,8 +60,10 @@ class DeactivateAccount extends Component
 
    }
 
-   public function deactivateAccount()
+   public function deactivateAccount($request = null)
    {
+
+      $request = $request ?: Craft::$app->getRequest();
 
       if ($this->settings->deactivateAccount)
       {
@@ -73,15 +75,31 @@ class DeactivateAccount extends Component
 
             if ($currentUser->admin) {
 
+               if ($request->getAcceptsJson())
+               {
+                  return [
+                     'success' => false,
+                     'message' => Craft::t('porter', 'porter_deactivate_account_flash_admins')
+                  ];
+               }
+
                Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_deactivate_account_flash_admins'));
                return true;
-               
+
             }
 
             if (Craft::$app->getUsers()->deactivateUser($currentUser))
             {
 
                Craft::$app->getUser()->logout(false);
+
+               if ($request->getAcceptsJson())
+               {
+                  return [
+                     'success' => true,
+                     'message' => Craft::t('porter', 'porter_deactivate_account_flash_success')
+                  ];
+               }
 
                Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_deactivate_account_flash_success'));
                return $this->settings->deactivateAccountRedirect;
@@ -90,7 +108,15 @@ class DeactivateAccount extends Component
 
          }
          else {
-            
+
+            if ($request->getAcceptsJson())
+            {
+               return [
+                  'success' => false,
+                  'message' => Craft::t('porter', 'porter_deactivate_account_flash_permission')
+               ];
+            }
+
             Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_deactivate_account_flash_permission'));
 
             return false;
