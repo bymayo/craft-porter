@@ -128,21 +128,8 @@ class DeleteAccount extends Component
 
             // $currentUser->inheritorOnDelete = $transferContentTo;
 
-            if (Craft::$app->getElements()->deleteElement($currentUser)) 
+            if (Craft::$app->getElements()->deleteElement($currentUser))
             {
-
-                  if ($this->settings->deleteAccountConfirmationEmail)
-                  {
-
-                     Porter::getInstance()->helper->notify(
-                        'porter_delete_account_confirmation_email',
-                        $currentUser->email,
-                        array(
-                           'user' => $currentUser
-                        )
-                     );
-
-                  }
 
                   Craft::$app->getUser()->logout(false);
 

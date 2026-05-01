@@ -9,24 +9,20 @@
 {% set title = 'Porter Settings' %}
 
 {% set tabs = {
-    delete: {
-        label: 'Delete Account',
-        url: '#delete'
+    account: {
+        label: 'Account',
+        url: '#account'
     },
-    deactivate: {
-        label: 'Deactivate Account',
-        url: '#deactivate'
-    },
-    magicLink: {
-        label: 'Magic Link',
-        url: '#magic-link'
+    login: {
+        label: 'Login',
+        url: '#login'
     },
     emailPassword: {
         label: 'Email & Password',
         url: '#email-password'
     },
-    emailNotifications: {
-        label: 'Email Notifications',
+    notifications: {
+        label: 'Notifications',
         url: '#email-notifications'
     }
 } %}
@@ -36,11 +32,12 @@
     <input type="hidden" name="action" value="porter/settings/save">
     <input type="hidden" name="pluginHandle" value="porter">
 
-    <div id="delete"> 
+    <div id="account">
+
+        <h2>Delete Account</h2>
 
         {{ forms.lightswitchField({
-            label: 'Delete Account',
-            instructions: 'Allow users to delete their own account on the front end.',
+            label: 'Allow users to delete their own account',
             id: 'deleteAccount',
             name: 'settings[deleteAccount]',
             on: settings['deleteAccount'],
@@ -87,13 +84,6 @@
                 }) }}
             </div>
 
-            {{ forms.lightswitchField({
-                label: 'Send Confirmation Email',
-                id: 'deleteAccountConfirmationEmail',
-                name: 'settings[deleteAccountConfirmationEmail]',
-                on: settings['deleteAccountConfirmationEmail']
-            }) }}
-
             {{ forms.textField({
                 label: 'Redirect',
                 id: 'deleteAccountRedirect',
@@ -115,13 +105,12 @@
 
         </div>
 
-    </div>
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
 
-    <div id="deactivate" class="hidden">
+        <h2>Deactivate Account</h2>
 
         {{ forms.lightswitchField({
-            label: 'Deactivate Account',
-            instructions: 'Allow users to deactivate their own account on the front end.',
+            label: 'Allow users to deactivate their own account',
             id: 'deactivateAccount',
             name: 'settings[deactivateAccount]',
             on: settings['deactivateAccount'],
@@ -134,33 +123,20 @@
                 label: 'Redirect',
                 id: 'deactivateAccountRedirect',
                 name: 'settings[deactivateAccountRedirect]',
-                value: settings['deactivateAccountRedirect']
+                value: settings['deactivateAccountRedirect'],
+                instructions: 'Can be overwritten at template level using `redirect`'
             }) }}
-
-            {{ forms.lightswitchField({
-                label: 'Send Confirmation Email',
-                id: 'deactivateAccountConfirmationEmail',
-                name: 'settings[deactivateAccountConfirmationEmail]',
-                on: settings['deactivateAccountConfirmationEmail']
-            }) }}
-
-            {{ forms.textField({
-                label: 'Delete deactivated users timeframe',
-                instructions: 'The number of days until deactivated users get trashed.',
-                id: 'deactivateAccountDeleteDays',
-                name: 'settings[deactivateAccountDeleteDays]',
-                value: settings['deactivateAccountDeleteDays']})
-            }}
 
         </div>
 
     </div>
 
-    <div id="magic-link" class="hidden">
+    <div id="login" class="hidden">
+
+        <h2>Magic Link</h2>
 
         {{ forms.lightswitchField({
-            label: 'Magic Link',
-            instructions: 'Allow users to login via a magic link that is emailed to them.',
+            label: 'Allow users to login via a magic link',
             id: 'magicLink',
             name: 'settings[magicLink]',
             on: settings['magicLink'],
@@ -202,13 +178,27 @@
 
         </div>
 
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+
+        <h2>Failed Login Attempts</h2>
+
+        {{ forms.textField({
+            label: 'Threshold',
+            instructions: 'How many consecutive failed sign in attempts trigger the Failed Login Attempts notification email. Only used when that notification is enabled.',
+            id: 'emailFailedLoginAttemptsThreshold',
+            name: 'settings[emailFailedLoginAttemptsThreshold]',
+            value: settings['emailFailedLoginAttemptsThreshold'],
+            size: 4
+        }) }}
+
     </div>
 
     <div id="email-password" class="hidden">
 
+        <h2>Block Burner / Disposable Emails</h2>
+
         {{ forms.lightswitchField({
-            label: 'Block Burner / Disposable Emails',
-            instructions: 'Block disposable, non-existent domain or invalid emails.',
+            label: 'Block disposable, non-existent domain or invalid emails',
             id: 'emailBurners',
             name: 'settings[emailBurners]',
             on: settings['emailBurners'],
@@ -227,8 +217,12 @@
 
         </div>
 
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+
+        <h2>Password Policy</h2>
+
         {{ forms.lightswitchField({
-            label: 'Force Password Policy',
+            label: 'Enforce password rules when users create or change a password',
             id: 'passwordForcePolicy',
             name: 'settings[passwordForcePolicy]',
             on: settings['passwordForcePolicy'],
@@ -271,12 +265,78 @@
 
     <div id="email-notifications" class="hidden">
 
+        <h2>Email Notifications</h2>
+
         {{ forms.lightswitchField({
             label: 'Welcome Email',
             instructions: 'Send a welcome email to users when their account is activated.',
             id: 'emailWelcome',
             name: 'settings[emailWelcome]',
             on: settings['emailWelcome']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'New Device Login Detected',
+            instructions: 'Notify users by email when a sign in is detected from a different IP address or device than their last sign in.',
+            id: 'emailNewDeviceLogin',
+            name: 'settings[emailNewDeviceLogin]',
+            on: settings['emailNewDeviceLogin']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Password Changed',
+            instructions: 'Notify users by email when their password is changed (by themselves, via password reset, or by an admin).',
+            id: 'emailPasswordChanged',
+            name: 'settings[emailPasswordChanged]',
+            on: settings['emailPasswordChanged']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Email Address Changed',
+            instructions: 'Notify users when their email address is changed. Sent to the user’s previous email address so they’re alerted if their account is compromised.',
+            id: 'emailAddressChanged',
+            name: 'settings[emailAddressChanged]',
+            on: settings['emailAddressChanged']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Account Suspended',
+            instructions: 'Notify users when their account is suspended.',
+            id: 'emailAccountSuspended',
+            name: 'settings[emailAccountSuspended]',
+            on: settings['emailAccountSuspended']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Account Restored',
+            instructions: 'Notify users when their suspended account is restored.',
+            id: 'emailAccountUnsuspended',
+            name: 'settings[emailAccountUnsuspended]',
+            on: settings['emailAccountUnsuspended']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Account Deactivated',
+            instructions: 'Notify users when their account is deactivated, regardless of who initiated it.',
+            id: 'emailAccountDeactivated',
+            name: 'settings[emailAccountDeactivated]',
+            on: settings['emailAccountDeactivated']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Account Deleted',
+            instructions: 'Notify users when their account is deleted, regardless of who initiated it.',
+            id: 'emailAccountDeleted',
+            name: 'settings[emailAccountDeleted]',
+            on: settings['emailAccountDeleted']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Failed Login Attempts',
+            instructions: 'Notify users when multiple failed sign in attempts are detected on their account. The threshold is configured on the Login tab. The email is sent once when the threshold is crossed and won’t fire again until the failure count resets (e.g. after a successful sign in).',
+            id: 'emailFailedLoginAttempts',
+            name: 'settings[emailFailedLoginAttempts]',
+            on: settings['emailFailedLoginAttempts']
         }) }}
 
     </div>

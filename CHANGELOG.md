@@ -1,11 +1,28 @@
 # Porter Changelog
 
-## 5.2.0 - 2026-04-29
+## 5.2.0 - 2026-05-01
+
+> [!WARNING]
+> The legacy `Send Confirmation Email` toggles and their system messages have been removed. Enable `Account Deleted` and `Account Deactivated` under `Porter > Notifications` to keep sending confirmation emails, and re-apply any customisations to `porter_account_deleted_email` / `porter_account_deactivated_email`.
 
 ### Added
-- Email Notifications: send a Welcome email to users when their account is activated (by the user or an admin)
-- New `Email Notifications` settings tab with a toggle to enable/disable each notification
-- New `porter_welcome_email` system message, editable under `Settings > System Messages`
+- Welcome email when a user’s account is activated
+- New Device Login email when a sign in is detected from a new IP or user agent
+- Password Changed email
+- Email Address Changed email, sent to the user’s previous address
+- Account Suspended and Account Restored emails
+- Account Deactivated and Account Deleted emails, fired on any path
+- Failed Login Attempts email when failures cross a configurable threshold (default 3)
+- Responsive HTML email layout at `src/templates/email/_layout.twig`
+- System messages for each notification, editable under `Settings > System Messages`
+- `porter_user_logins` table tracking the last known IP/UA hash per user
+
+### Removed
+- `deleteAccountConfirmationEmail` / `deactivateAccountConfirmationEmail` settings
+- `porter_delete_account_confirmation_email` / `porter_deactivate_account_confirmation_email` system messages
+
+### Fixed
+- Template-level `redirect` override on the deactivate account form was ignored on submit
 
 ## 5.1.3 - 2026-02-22
 

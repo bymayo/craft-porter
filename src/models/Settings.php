@@ -27,8 +27,6 @@ class Settings extends Model
 
     public $deleteAccountConfirmationField = 'email';
 
-    public $deleteAccountConfirmationEmail = 1;
-
     public $deleteAccountRedirect = '/';
 
     public $deleteAccountTransfer = null;
@@ -39,13 +37,27 @@ class Settings extends Model
 
     public $deactivateAccountRedirect = '/';
 
-    public $deactivateAccountConfirmationEmail = 1;
-
-    public $deactivateAccountDeleteDays = 30;
-
-    // Welcome Email
+    // Email Notifications
 
     public $emailWelcome = 0;
+
+    public $emailNewDeviceLogin = 0;
+
+    public $emailPasswordChanged = 0;
+
+    public $emailAddressChanged = 0;
+
+    public $emailAccountSuspended = 0;
+
+    public $emailAccountUnsuspended = 0;
+
+    public $emailAccountDeactivated = 0;
+
+    public $emailAccountDeleted = 0;
+
+    public $emailFailedLoginAttempts = 0;
+
+    public $emailFailedLoginAttemptsThreshold = 3;
 
     // Magic Link
 
@@ -80,11 +92,17 @@ class Settings extends Model
         return [
             [
                 [
-                    'deleteAccount', 
-                    'deleteAccountConfirmationEmail', 
+                    'deleteAccount',
                     'deactivateAccount',
-                    'deactivateAccountConfirmationEmail',
                     'emailWelcome',
+                    'emailNewDeviceLogin',
+                    'emailPasswordChanged',
+                    'emailAddressChanged',
+                    'emailAccountSuspended',
+                    'emailAccountUnsuspended',
+                    'emailAccountDeactivated',
+                    'emailAccountDeleted',
+                    'emailFailedLoginAttempts',
                     'magicLink',
                     'magicLinkControlPanel', 
                     'magicLinkFrontEnd', 
@@ -95,11 +113,11 @@ class Settings extends Model
             ],
             [
                 [
-                    'deactivateAccountDeleteDays', 
                     'magicLinkExpirySeconds',
-                    'passwordForcePolicyMin', 
-                    'passwordForcePolicyMax'
-                ], 
+                    'passwordForcePolicyMin',
+                    'passwordForcePolicyMax',
+                    'emailFailedLoginAttemptsThreshold'
+                ],
                 'integer'
             ],
             [

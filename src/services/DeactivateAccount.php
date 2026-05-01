@@ -78,21 +78,8 @@ class DeactivateAccount extends Component
                
             }
 
-            if (Craft::$app->getUsers()->deactivateUser($currentUser)) 
+            if (Craft::$app->getUsers()->deactivateUser($currentUser))
             {
-
-               if ($this->settings->deactivateAccountConfirmationEmail)
-               {
-
-                  Porter::getInstance()->helper->notify(
-                     'porter_deactivate_account_confirmation_email',
-                     $currentUser->email,
-                     array(
-                        'user' => $currentUser
-                     )
-                  );
-
-               }
 
                Craft::$app->getUser()->logout(false);
 

@@ -21,21 +21,27 @@ use bymayo\porter\models\Settings;
 
 use Craft;
 use craft\base\Plugin;
+use craft\controllers\UsersController;
 use craft\services\Plugins;
 use craft\services\SystemMessages;
 use craft\services\Users;
+use craft\events\LoginFailureEvent;
 use craft\events\PluginEvent;
 use craft\events\UserEvent;
 use craft\web\twig\variables\CraftVariable;
+use craft\web\User as WebUser;
 use craft\web\UrlManager;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterEmailMessagesEvent;
 use craft\elements\User;
 use craft\log\MonologTarget;
 
+use craft\events\ModelEvent as CraftModelEvent;
+
 use Psr\Log\LogLevel;
 use yii\base\Event;
 use yii\base\ModelEvent;
+use yii\web\UserEvent as YiiUserEvent;
 
 class Porter extends Plugin
 {
@@ -53,7 +59,7 @@ class Porter extends Plugin
     /**
      * @var string
      */
-    public string $schemaVersion = '1.1.0';
+    public string $schemaVersion = '1.2.0';
 
     /**
      * @var bool
@@ -160,18 +166,6 @@ class Porter extends Plugin
                 $event->messages = array_merge(
                     $event->messages, [
                         [
-                            'key' => 'porter_delete_account_confirmation_email',
-                            'heading' => Craft::t('porter', 'porter_delete_account_confirmation_email_heading'),
-                            'subject' => Craft::t('porter', 'porter_delete_account_confirmation_email_subject'),
-                            'body' => Craft::t('porter', 'porter_delete_account_confirmation_email_body')
-                        ],
-                        [
-                            'key' => 'porter_deactivate_account_confirmation_email',
-                            'heading' => Craft::t('porter', 'porter_deactivate_account_confirmation_email_heading'),
-                            'subject' => Craft::t('porter', 'porter_deactivate_account_confirmation_email_subject'),
-                            'body' => Craft::t('porter', 'porter_deactivate_account_confirmation_email_body')
-                        ],
-                        [
                             'key' => 'porter_magic_link_email',
                             'heading' => Craft::t('porter', 'porter_magic_link_email_heading'),
                             'subject' => Craft::t('porter', 'porter_magic_link_email_subject'),
@@ -182,6 +176,54 @@ class Porter extends Plugin
                             'heading' => Craft::t('porter', 'porter_welcome_email_heading'),
                             'subject' => Craft::t('porter', 'porter_welcome_email_subject'),
                             'body' => Craft::t('porter', 'porter_welcome_email_body')
+                        ],
+                        [
+                            'key' => 'porter_new_device_login_email',
+                            'heading' => Craft::t('porter', 'porter_new_device_login_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_new_device_login_email_subject'),
+                            'body' => Craft::t('porter', 'porter_new_device_login_email_body')
+                        ],
+                        [
+                            'key' => 'porter_password_changed_email',
+                            'heading' => Craft::t('porter', 'porter_password_changed_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_password_changed_email_subject'),
+                            'body' => Craft::t('porter', 'porter_password_changed_email_body')
+                        ],
+                        [
+                            'key' => 'porter_email_address_changed_email',
+                            'heading' => Craft::t('porter', 'porter_email_address_changed_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_email_address_changed_email_subject'),
+                            'body' => Craft::t('porter', 'porter_email_address_changed_email_body')
+                        ],
+                        [
+                            'key' => 'porter_account_suspended_email',
+                            'heading' => Craft::t('porter', 'porter_account_suspended_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_account_suspended_email_subject'),
+                            'body' => Craft::t('porter', 'porter_account_suspended_email_body')
+                        ],
+                        [
+                            'key' => 'porter_account_unsuspended_email',
+                            'heading' => Craft::t('porter', 'porter_account_unsuspended_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_account_unsuspended_email_subject'),
+                            'body' => Craft::t('porter', 'porter_account_unsuspended_email_body')
+                        ],
+                        [
+                            'key' => 'porter_account_deactivated_email',
+                            'heading' => Craft::t('porter', 'porter_account_deactivated_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_account_deactivated_email_subject'),
+                            'body' => Craft::t('porter', 'porter_account_deactivated_email_body')
+                        ],
+                        [
+                            'key' => 'porter_account_deleted_email',
+                            'heading' => Craft::t('porter', 'porter_account_deleted_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_account_deleted_email_subject'),
+                            'body' => Craft::t('porter', 'porter_account_deleted_email_body')
+                        ],
+                        [
+                            'key' => 'porter_failed_login_attempts_email',
+                            'heading' => Craft::t('porter', 'porter_failed_login_attempts_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_failed_login_attempts_email_subject'),
+                            'body' => Craft::t('porter', 'porter_failed_login_attempts_email_body')
                         ]
                     ]
                 );
@@ -194,6 +236,82 @@ class Porter extends Plugin
             Users::EVENT_AFTER_ACTIVATE_USER,
             function (UserEvent $event) {
                 Porter::getInstance()->emailNotifications->sendWelcome($event->user);
+            }
+        );
+
+        Event::on(
+            Users::class,
+            Users::EVENT_AFTER_SUSPEND_USER,
+            function (UserEvent $event) {
+                Porter::getInstance()->emailNotifications->sendAccountSuspended($event->user);
+            }
+        );
+
+        Event::on(
+            Users::class,
+            Users::EVENT_AFTER_UNSUSPEND_USER,
+            function (UserEvent $event) {
+                Porter::getInstance()->emailNotifications->sendAccountUnsuspended($event->user);
+            }
+        );
+
+        Event::on(
+            Users::class,
+            Users::EVENT_AFTER_DEACTIVATE_USER,
+            function (UserEvent $event) {
+                Porter::getInstance()->emailNotifications->sendAccountDeactivated($event->user);
+            }
+        );
+
+        Event::on(
+            User::class,
+            User::EVENT_BEFORE_DELETE,
+            function (CraftModelEvent $event) {
+                if ($event->sender instanceof User) {
+                    Porter::getInstance()->emailNotifications->sendAccountDeleted($event->sender);
+                }
+            }
+        );
+
+        Event::on(
+            WebUser::class,
+            WebUser::EVENT_AFTER_LOGIN,
+            function (YiiUserEvent $event) {
+                if ($event->identity instanceof User) {
+                    Porter::getInstance()->emailNotifications->handleLogin($event->identity);
+                }
+            }
+        );
+
+        Event::on(
+            User::class,
+            User::EVENT_BEFORE_SAVE,
+            function (CraftModelEvent $event) {
+                $emailNotifications = Porter::getInstance()->emailNotifications;
+                $emailNotifications->capturePasswordChange($event->sender);
+                $emailNotifications->captureEmailChange($event->sender);
+            }
+        );
+
+        Event::on(
+            User::class,
+            User::EVENT_AFTER_SAVE,
+            function (CraftModelEvent $event) {
+                if (!$event->isNew) {
+                    $emailNotifications = Porter::getInstance()->emailNotifications;
+                    $emailNotifications->sendPasswordChanged($event->sender);
+                    $emailNotifications->sendEmailAddressChanged($event->sender);
+                }
+            }
+        );
+
+        Event::on(
+            UsersController::class,
+            UsersController::EVENT_LOGIN_FAILURE,
+            function (LoginFailureEvent $event) {
+                if ($event->user instanceof User) {
+                    Porter::getInstance()->emailNotifications->sendFailedLoginAttempts($event->user);
+                }
             }
         );
 

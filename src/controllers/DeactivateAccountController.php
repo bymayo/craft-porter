@@ -19,7 +19,7 @@ class DeactivateAccountController extends Controller
 
          if ($action)
          {
-            return $this->redirect($action);
+            return $this->redirectToPostedUrl();
          }
 
    }

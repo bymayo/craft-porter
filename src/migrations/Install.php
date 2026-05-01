@@ -63,6 +63,23 @@ class Install extends Migration
             );
         }
 
+        $tableSchema = Craft::$app->db->schema->getTableSchema('{{%porter_user_logins}}');
+        if ($tableSchema === null) {
+            $tablesCreated = true;
+            $this->createTable(
+                '{{%porter_user_logins}}',
+                [
+                    'id' => $this->primaryKey(),
+                    'userId' => $this->integer()->notNull(),
+                    'ipHash' => $this->string(64)->notNull(),
+                    'uaHash' => $this->string(64)->notNull(),
+                    'dateCreated' => $this->dateTime()->notNull(),
+                    'dateUpdated' => $this->dateTime()->notNull(),
+                    'uid' => $this->uid()
+                ]
+            );
+        }
+
         return $tablesCreated;
     }
 
@@ -89,6 +106,17 @@ class Install extends Migration
             'token',
             true
         );
+
+        $this->createIndex(
+            $this->db->getIndexName(
+                '{{%porter_user_logins}}',
+                'userId',
+                true
+            ),
+            '{{%porter_user_logins}}',
+            'userId',
+            true
+        );
     }
 
     protected function addForeignKeys()
@@ -97,6 +125,16 @@ class Install extends Migration
         $this->addForeignKey(
             $this->db->getForeignKeyName('{{%porter_magiclink}}', 'userId'),
             '{{%porter_magiclink}}',
+            'userId',
+            '{{%users}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            $this->db->getForeignKeyName('{{%porter_user_logins}}', 'userId'),
+            '{{%porter_user_logins}}',
             'userId',
             '{{%users}}',
             'id',
@@ -113,5 +151,6 @@ class Install extends Migration
     protected function removeTables()
     {
         $this->dropTableIfExists('{{%porter_magiclink}}');
+        $this->dropTableIfExists('{{%porter_user_logins}}');
     }
 }

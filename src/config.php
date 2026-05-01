@@ -21,15 +21,12 @@ return [
     'deleteAccountConfirmationType' => 'confirmationKeyword',
     'deleteAccountConfirmationKeyword' => 'DELETE',
     'deleteAccountConfirmationField' => 'email',
-    'deleteAccountConfirmationEmail' => true,
     'deleteAccountRedirect' => '/',
     'deleteAccountTransfer' => null,
 
     // Deactivate Account
     'deactivateAccount' => false,
     'deactivateAccountRedirect' => '/',
-    'deactivateAccountConfirmationEmail' => true,
-    'deactivateAccountDeleteDays' => 30,
 
     // Magic Link
     'magicLink' => false,
@@ -49,6 +46,15 @@ return [
     'passwordForcePolicyRules' => null,
 
     // Email Notifications
-    'emailWelcome' => false
+    'emailWelcome' => false,
+    'emailNewDeviceLogin' => false,
+    'emailPasswordChanged' => false,
+    'emailAddressChanged' => false,
+    'emailAccountSuspended' => false,
+    'emailAccountUnsuspended' => false,
+    'emailAccountDeactivated' => false,
+    'emailAccountDeleted' => false,
+    'emailFailedLoginAttempts' => false,
+    'emailFailedLoginAttemptsThreshold' => 3
 
 ];
