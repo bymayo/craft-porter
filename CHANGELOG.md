@@ -1,5 +1,28 @@
 # Porter Changelog
 
+## 5.3.0 - 2026-08-28
+
+### Added
+- Password Policy settings tab, with each feature switched on separately
+- Have I Been Pwned checking, so passwords found in a data breach are rejected
+- Password strength indicator for the control panel, the set password screen and the front end, with an optional minimum strength
+- Blocklist, to reject passwords containing the user's own details, the site name or your own banned words
+- Password history, so old passwords can't be reused
+- Password expiry, with `porter/passwords/retention` to run from cron and a `Password Retention` utility
+- `Password Expiring Soon` and `Password Expired` emails
+- Exemptions for admins and chosen user groups
+- Twig helpers for the strength indicator, the rules, password strength and expiry dates
+- `Force reset expired passwords` permission
+
+### Changed
+- Password errors now appear inline on the field, and work in the console and queue
+- Porter's minimum length replaces Craft's six character rule instead of sitting alongside it
+- The `Email & Password` tab is now `Email`, with passwords moved to a new `Password Policy` tab
+- All four `Redirect` settings share the same label, instructions and placeholder
+
+### Fixed
+- Static analysis wasn't running, due to a typo in `phpstan.neon`
+
 ## 5.2.2 - 2026-05-01
 
 ### Fixed

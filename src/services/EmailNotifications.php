@@ -361,4 +361,44 @@ class EmailNotifications extends Component
 
    }
 
+   public function sendPasswordExpiring(User $user, int $daysRemaining, ?\DateTime $expiryDate = null)
+   {
+
+      if (!$this->settings->emailPasswordExpiring || !$user->email)
+      {
+         return;
+      }
+
+      Porter::getInstance()->helper->notify(
+         'porter_password_expiring_email',
+         $user->email,
+         array(
+            'user' => $user,
+            'daysRemaining' => $daysRemaining,
+            'expiryDate' => $expiryDate,
+            'dateCreated' => new \DateTime()
+         )
+      );
+
+   }
+
+   public function sendPasswordExpired(User $user)
+   {
+
+      if (!$this->settings->emailPasswordExpired || !$user->email)
+      {
+         return;
+      }
+
+      Porter::getInstance()->helper->notify(
+         'porter_password_expired_email',
+         $user->email,
+         array(
+            'user' => $user,
+            'dateCreated' => new \DateTime()
+         )
+      );
+
+   }
+
 }

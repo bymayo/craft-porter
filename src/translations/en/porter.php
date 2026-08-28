@@ -125,5 +125,23 @@ return [
 
     {% if user.lastLoginDate %}Last sign in: {{ user.lastLoginDate|date(\'F j, Y\') }}{% endif %}
 
-    If you no longer need this account you can ignore this email.'
+    If you no longer need this account you can ignore this email.',
+    'porter_password_expiring_email_heading' => 'When a user\'s password is about to expire.',
+    'porter_password_expiring_email_subject' => 'Your password expires soon',
+    'porter_password_expiring_email_body' => 'Hey {{ user.friendlyName }},
+
+    Your password expires in {{ daysRemaining }} day{% if daysRemaining != 1 %}s{% endif %}. Once it does you\'ll be asked to set a new one before you can carry on.
+
+    {% if expiryDate %}Expires: {{ expiryDate|date(\'F j, Y\') }}{% endif %}
+
+    You can change it now to save yourself the interruption.',
+    'porter_password_expired_email_heading' => 'When a user\'s password has expired and a reset is required.',
+    'porter_password_expired_email_subject' => 'Your password has expired',
+    'porter_password_expired_email_body' => 'Hey {{ user.friendlyName }},
+
+    Your password has expired, so we\'ve asked for it to be reset. You\'ll be prompted to choose a new one the next time you sign in.
+
+    When: {{ dateCreated|date(\'F j, Y \\a\\t g:ia\') }}
+
+    If you have any trouble signing in, just reply to this email.'
 ];

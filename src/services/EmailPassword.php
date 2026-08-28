@@ -18,46 +18,32 @@ class EmailPassword extends Component
        $this->settings = Porter::getInstance()->helper->settings();
    }
 
-   public function checkPasswordPolicy($password)
+   /**
+    * Kept for backwards compatibility.
+    *
+    * The policy now runs through Craft's own validation — see
+    * bymayo\porter\rules\UserRules and the PasswordPolicy service. This
+    * still works for anything calling it directly.
+    */
+   public function checkPasswordPolicy($password, $user = null)
    {
 
-      $errors = [];
+      $policy = Porter::getInstance()->passwordPolicy;
 
-      if (empty($this->settings->passwordForcePolicyRules))
+      $errors = $policy->check($password, $user);
+
+      $min = $policy->minLength();
+
+      if (strlen((string) $password) < $min)
       {
-         return $errors;
+         array_unshift($errors, Craft::t('porter', 'Password must contain at least {min} characters.', ['min' => $min]));
       }
 
-      foreach ($this->settings->passwordForcePolicyRules as $rule)
-      {
-         switch ($rule) {
-            case 'lowercase':
-               $error = $this->containsLowercase($password);
-               if ($error) { $errors[] = $error; }
-               break;
-            case 'uppercase':
-               $error = $this->containsUppercase($password);
-               if ($error) { $errors[] = $error; }
-               break;
-            case 'numeric':
-               $error = $this->containsNumeric($password);
-               if ($error) { $errors[] = $error; }
-               break;
-            case 'symbol':
-               $error = $this->containsSymbol($password);
-               if ($error) { $errors[] = $error; }
-               break;
-         }
-      }
+      $max = $policy->maxLength();
 
-      if (strlen($password) < $this->settings->passwordForcePolicyMin)
+      if ($max && strlen((string) $password) > $max)
       {
-         $errors[] = Craft::t('porter', 'Password must contain at least {min} characters.', ['min' => $this->settings->passwordForcePolicyMin]);
-      }
-
-      if (strlen($password) > $this->settings->passwordForcePolicyMax)
-      {
-         $errors[] = Craft::t('porter', 'Password must be less than {max} characters.', ['max' => $this->settings->passwordForcePolicyMax]);
+         $errors[] = Craft::t('porter', 'Password can’t be more than {max} characters.', ['max' => $max]);
       }
 
       return $errors;

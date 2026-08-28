@@ -69,6 +69,10 @@ class Settings extends Model
 
     public $emailFailedLoginAttemptsThreshold = 3;
 
+    public $emailPasswordExpiring = 0;
+
+    public $emailPasswordExpired = 0;
+
     // Magic Link
 
     public $magicLink = 0;
@@ -93,9 +97,68 @@ class Settings extends Model
 
     public $passwordForcePolicyMin = 8;
 
-    public $passwordForcePolicyMax = 128;
+    public $passwordForcePolicyMax = 0;
 
     public $passwordForcePolicyRules = null;
+
+    // Password - Strength & Breach
+
+    public $passwordPwned = 0;
+
+    /**
+     * 'open' or 'closed'. Config file only.
+     */
+    public $passwordPwnedFailMode = 'open';
+
+    public $passwordStrengthIndicator = 0;
+
+    /**
+     * 0 is don't enforce, otherwise 1-4.
+     */
+    public $passwordStrengthMinScore = 0;
+
+    /**
+     * Config file only.
+     */
+    public $passwordCspNonce = 0;
+
+    // Password - Blocklist
+
+    public $passwordBlocklist = 0;
+
+    /**
+     * Any of 'userDetails', 'siteName', 'substitutions'.
+     */
+    public $passwordBlocklistSources = ['userDetails', 'siteName', 'substitutions'];
+
+    public $passwordBlocklistWords = null;
+
+    // Password - History
+
+    public $passwordHistory = 0;
+
+    public $passwordHistoryCount = 5;
+
+    // Password - Expiry
+
+    public $passwordExpiry = 0;
+
+    public $passwordExpiryAmount = 90;
+
+    public $passwordExpiryPeriod = 'days';
+
+    public $passwordExpiryWarningDays = 7;
+
+    /**
+     * Config file only.
+     */
+    public $passwordExpiryFrontEndRedirect = null;
+
+    // Password - Exemptions
+
+    public $passwordExemptAdmins = 0;
+
+    public $passwordExemptGroups = null;
 
     public function rules(): array
     {
@@ -119,7 +182,16 @@ class Settings extends Model
                     'magicLinkControlPanel',
                     'magicLinkFrontEnd',
                     'emailBurners',
-                    'passwordForcePolicy'
+                    'passwordForcePolicy',
+                    'passwordPwned',
+                    'passwordStrengthIndicator',
+                    'passwordCspNonce',
+                    'passwordBlocklist',
+                    'passwordHistory',
+                    'passwordExpiry',
+                    'passwordExemptAdmins',
+                    'emailPasswordExpiring',
+                    'emailPasswordExpired'
                 ],
                 'boolean'
             ],
@@ -130,9 +202,40 @@ class Settings extends Model
                     'passwordForcePolicyMax',
                     'emailFailedLoginAttemptsThreshold',
                     'inactiveAccountReminderDays',
-                    'inactiveAccountDeactivateDays'
+                    'inactiveAccountDeactivateDays',
+                    'passwordHistoryCount',
+                    'passwordStrengthMinScore',
+                    'passwordExpiryAmount',
+                    'passwordExpiryWarningDays'
                 ],
                 'integer'
+            ],
+            [
+                ['passwordPwnedFailMode'],
+                'in',
+                'range' => ['open', 'closed']
+            ],
+            [
+                ['passwordStrengthMinScore'],
+                'integer',
+                'min' => 0,
+                'max' => 4
+            ],
+            [
+                ['passwordExpiryPeriod'],
+                'in',
+                'range' => ['days', 'weeks', 'months', 'years']
+            ],
+            [
+                ['passwordHistoryCount'],
+                'integer',
+                'min' => 1,
+                'max' => 24
+            ],
+            [
+                ['passwordExpiryAmount'],
+                'integer',
+                'min' => 0
             ],
             [
                 [
@@ -142,14 +245,20 @@ class Settings extends Model
                     'deleteAccountRedirect', 
                     'deactivateAccountRedirect',
                     'magicLinkRedirect',
-                    'emailsBurnersVerifierApiKey'
+                    'emailsBurnersVerifierApiKey',
+                    'passwordPwnedFailMode',
+                    'passwordExpiryPeriod',
+                    'passwordBlocklistWords',
+                    'passwordExpiryFrontEndRedirect'
                 ], 
                 'string'
             ],
             [
                 [
                     // 'deleteAccountTransfer',
-                    'passwordForcePolicyRules'
+                    'passwordForcePolicyRules',
+                    'passwordBlocklistSources',
+                    'passwordExemptGroups'
                 ], 
                 ArrayValidator::class
             ]

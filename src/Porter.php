@@ -17,21 +17,35 @@ use bymayo\porter\services\DeactivateAccount;
 use bymayo\porter\services\DeleteAccount;
 use bymayo\porter\services\EmailNotifications;
 use bymayo\porter\services\InactiveAccounts;
+use bymayo\porter\services\PasswordPolicy;
+use bymayo\porter\services\PasswordRetention;
+use bymayo\porter\services\Security;
+use bymayo\porter\rules\UserRules;
+use bymayo\porter\utilities\PasswordRetentionUtility;
 use bymayo\porter\variables\PorterVariable;
 use bymayo\porter\models\Settings;
 
 use Craft;
 use craft\base\Plugin;
 use craft\controllers\UsersController;
+use craft\helpers\UrlHelper;
 use craft\services\Plugins;
 use craft\services\SystemMessages;
+use craft\services\UserPermissions;
 use craft\services\Users;
+use craft\services\Utilities;
+use craft\events\DefineRulesEvent;
 use craft\events\LoginFailureEvent;
 use craft\events\PluginEvent;
+use craft\events\RegisterComponentTypesEvent;
+use craft\events\RegisterUserPermissionsEvent;
+use craft\events\TemplateEvent;
 use craft\events\UserEvent;
+use craft\web\Application;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\User as WebUser;
 use craft\web\UrlManager;
+use craft\web\View;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterEmailMessagesEvent;
 use craft\elements\User;
@@ -44,6 +58,19 @@ use yii\base\Event;
 use yii\base\ModelEvent;
 use yii\web\UserEvent as YiiUserEvent;
 
+/**
+ * @property Helper $helper
+ * @property MagicLink $magicLink
+ * @property DeleteAccount $deleteAccount
+ * @property DeactivateAccount $deactivateAccount
+ * @property EmailPassword $emailPassword
+ * @property EmailNotifications $emailNotifications
+ * @property InactiveAccounts $inactiveAccounts
+ * @property PasswordPolicy $passwordPolicy
+ * @property PasswordRetention $passwordRetention
+ * @property Security $security
+ * @property Settings $settings
+ */
 class Porter extends Plugin
 {
     // Static Properties
@@ -60,7 +87,7 @@ class Porter extends Plugin
     /**
      * @var string
      */
-    public string $schemaVersion = '1.3.0';
+    public string $schemaVersion = '1.4.0';
 
     /**
      * @var bool
@@ -134,7 +161,10 @@ class Porter extends Plugin
             'deactivateAccount' => DeactivateAccount::class,
             'emailPassword' => EmailPassword::class,
             'emailNotifications' => EmailNotifications::class,
-            'inactiveAccounts' => InactiveAccounts::class
+            'inactiveAccounts' => InactiveAccounts::class,
+            'passwordPolicy' => PasswordPolicy::class,
+            'passwordRetention' => PasswordRetention::class,
+            'security' => Security::class
         ]);
 
         Event::on(
@@ -236,6 +266,18 @@ class Porter extends Plugin
                             'heading' => Craft::t('porter', 'porter_inactive_account_reminder_email_heading'),
                             'subject' => Craft::t('porter', 'porter_inactive_account_reminder_email_subject'),
                             'body' => Craft::t('porter', 'porter_inactive_account_reminder_email_body')
+                        ],
+                        [
+                            'key' => 'porter_password_expiring_email',
+                            'heading' => Craft::t('porter', 'porter_password_expiring_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_password_expiring_email_subject'),
+                            'body' => Craft::t('porter', 'porter_password_expiring_email_body')
+                        ],
+                        [
+                            'key' => 'porter_password_expired_email',
+                            'heading' => Craft::t('porter', 'porter_password_expired_email_heading'),
+                            'subject' => Craft::t('porter', 'porter_password_expired_email_subject'),
+                            'body' => Craft::t('porter', 'porter_password_expired_email_body')
                         ]
                     ]
                 );
@@ -303,6 +345,7 @@ class Porter extends Plugin
                 $emailNotifications = Porter::getInstance()->emailNotifications;
                 $emailNotifications->capturePasswordChange($event->sender);
                 $emailNotifications->captureEmailChange($event->sender);
+                Porter::getInstance()->passwordRetention->capturePasswordChange($event->sender);
             }
         );
 
@@ -315,6 +358,7 @@ class Porter extends Plugin
                     $emailNotifications->sendPasswordChanged($event->sender);
                     $emailNotifications->sendEmailAddressChanged($event->sender);
                 }
+                Porter::getInstance()->passwordRetention->flushPasswordChange($event->sender);
             }
         );
 
@@ -351,26 +395,90 @@ class Porter extends Plugin
 
                 }
 
-                if ($this->settings->passwordForcePolicy && ($user->newPassword || strlen($user->newPassword) > 0))
-                {
+            }
+        );
 
-                    $errors = $this->emailPassword->checkPasswordPolicy($user->newPassword);
+        // Password rules go in through Craft's own validation rather than a
+        // before-validate hook, so errors render inline in the control panel,
+        // are readable from `user.getErrors('newPassword')` on the front end,
+        // and don't rely on a session flash that isn't there in console and
+        // queue requests.
+        Event::on(
+            User::class,
+            User::EVENT_DEFINE_RULES,
+            function (DefineRulesEvent $event) {
 
-                    if ($errors)
-                    {
+                $user = $event->sender instanceof User ? $event->sender : null;
 
-                        $event->isValid = 0;
+                $event->rules = UserRules::applyTo($event->rules, $user);
 
-                        foreach ($errors as $error) {
-                            $user->addError('newPassword', $error);
-                        }
+            }
+        );
 
-                        Craft::$app->getSession()->setFlash('porter', implode(' ', $errors));
+        Event::on(
+            UserPermissions::class,
+            UserPermissions::EVENT_REGISTER_PERMISSIONS,
+            function (RegisterUserPermissionsEvent $event) {
+                $event->permissions[] = [
+                    'heading' => 'Porter',
+                    'permissions' => [
+                        'porter:forceResetPasswords' => [
+                            'label' => Craft::t('porter', 'Force reset expired passwords')
+                        ]
+                    ]
+                ];
+            }
+        );
 
-                    }
+        Event::on(
+            Utilities::class,
+            Utilities::EVENT_REGISTER_UTILITIES,
+            function (RegisterComponentTypesEvent $event) {
 
+                if (!Porter::getInstance()->passwordRetention->isEnabled()) {
+                    return;
                 }
 
+                $event->types[] = PasswordRetentionUtility::class;
+
+            }
+        );
+
+        Event::on(
+            View::class,
+            View::EVENT_BEFORE_RENDER_PAGE_TEMPLATE,
+            function (TemplateEvent $event) {
+
+                // Control panel pages, plus Craft's own set-password and
+                // login screens — those come in as site requests but render
+                // in control panel template mode, and set-password is exactly
+                // where a strength meter is wanted. The mode comes off the
+                // event, since the view isn't switched over yet.
+                $isCpTemplate = Craft::$app->getRequest()->getIsCpRequest()
+                    || $event->templateMode === View::TEMPLATE_MODE_CP;
+
+                if (!$isCpTemplate) {
+                    return;
+                }
+
+                if (!Porter::getInstance()->passwordPolicy->strengthIndicatorEnabled()) {
+                    return;
+                }
+
+                // Pass the user whose password is being set, so the blocklist
+                // can be checked live here the same way it is on the front end.
+                Porter::getInstance()->passwordPolicy->registerIndicatorAssets(
+                    $this->_editedUser()
+                );
+
+            }
+        );
+
+        Event::on(
+            Application::class,
+            Application::EVENT_BEFORE_REQUEST,
+            function () {
+                $this->_redirectExpiredPasswords();
             }
         );
 
@@ -382,6 +490,86 @@ class Porter extends Plugin
     protected function createSettingsModel(): ?\craft\base\Model
     {
         return new Settings();
+    }
+
+    /**
+     * The user whose account is being edited in the control panel.
+     *
+     * Craft routes these as `myaccount/…` or `users/<id>/…`. Anything else
+     * (a new user, say) returns null, and the blocklist falls back to being
+     * checked on save.
+     *
+     * Safe to hand to the browser: whoever is on that page can already see
+     * the user's name and email on it.
+     */
+    private function _editedUser(): ?User
+    {
+
+        $segments = Craft::$app->getRequest()->getSegments();
+
+        if (!$segments) {
+            return null;
+        }
+
+        if ($segments[0] === 'myaccount') {
+            return Craft::$app->getUser()->getIdentity();
+        }
+
+        if ($segments[0] === 'users' && isset($segments[1]) && ctype_digit((string)$segments[1])) {
+            return Craft::$app->getUsers()->getUserById((int)$segments[1]);
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Sends signed-in front-end users with an expired password to the
+     * configured set-password page.
+     *
+     * Craft handles this itself in the control panel; front-end-only users
+     * would otherwise never be prompted.
+     */
+    private function _redirectExpiredPasswords(): void
+    {
+
+        if (!Craft::$app->getIsInstalled()) {
+            return;
+        }
+
+        if (!$this->settings->passwordExpiryFrontEndRedirect) {
+            return;
+        }
+
+        $request = Craft::$app->getRequest();
+
+        if (
+            $request->getIsConsoleRequest() ||
+            $request->getIsCpRequest() ||
+            $request->getIsActionRequest() ||
+            $request->getIsAjax()
+        ) {
+            return;
+        }
+
+        $user = Craft::$app->getUser()->getIdentity();
+
+        // Read through the service: UserQuery doesn't select
+        // `passwordResetRequired`, so the identity's own value is never set.
+        if (!$user || !Porter::getInstance()->passwordRetention->resetRequired($user)) {
+            return;
+        }
+
+        $url = UrlHelper::siteUrl($this->settings->passwordExpiryFrontEndRedirect);
+
+        // Don't bounce the set-password page back to itself.
+        if (rtrim($request->getAbsoluteUrl(), '/') === rtrim($url, '/')) {
+            return;
+        }
+
+        Craft::$app->getResponse()->redirect($url)->send();
+        Craft::$app->end();
+
     }
 
     private function _registerLogTarget(): void

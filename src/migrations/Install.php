@@ -74,6 +74,23 @@ class Install extends Migration
                     'ipHash' => $this->string(64),
                     'uaHash' => $this->string(64),
                     'inactiveReminderSentAt' => $this->dateTime(),
+                    'passwordExpiryReminderSentAt' => $this->dateTime(),
+                    'dateCreated' => $this->dateTime()->notNull(),
+                    'dateUpdated' => $this->dateTime()->notNull(),
+                    'uid' => $this->uid()
+                ]
+            );
+        }
+
+        $tableSchema = Craft::$app->db->schema->getTableSchema('{{%porter_password_history}}');
+        if ($tableSchema === null) {
+            $tablesCreated = true;
+            $this->createTable(
+                '{{%porter_password_history}}',
+                [
+                    'id' => $this->primaryKey(),
+                    'userId' => $this->integer()->notNull(),
+                    'passwordHash' => $this->string(255)->notNull(),
                     'dateCreated' => $this->dateTime()->notNull(),
                     'dateUpdated' => $this->dateTime()->notNull(),
                     'uid' => $this->uid()
@@ -118,6 +135,17 @@ class Install extends Migration
             'userId',
             true
         );
+
+        $this->createIndex(
+            $this->db->getIndexName(
+                '{{%porter_password_history}}',
+                'userId',
+                false
+            ),
+            '{{%porter_password_history}}',
+            'userId',
+            false
+        );
     }
 
     protected function addForeignKeys()
@@ -143,6 +171,16 @@ class Install extends Migration
             'CASCADE'
         );
 
+        $this->addForeignKey(
+            $this->db->getForeignKeyName('{{%porter_password_history}}', 'userId'),
+            '{{%porter_password_history}}',
+            'userId',
+            '{{%users}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
+
     }
 
     protected function insertDefaultData()
@@ -153,5 +191,6 @@ class Install extends Migration
     {
         $this->dropTableIfExists('{{%porter_magiclink}}');
         $this->dropTableIfExists('{{%porter_user_logins}}');
+        $this->dropTableIfExists('{{%porter_password_history}}');
     }
 }

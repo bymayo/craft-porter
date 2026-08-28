@@ -17,9 +17,13 @@
         label: 'Login',
         url: '#login'
     },
-    emailPassword: {
-        label: 'Email & Password',
+    email: {
+        label: 'Email',
         url: '#email-password'
+    },
+    password: {
+        label: 'Password Policy',
+        url: '#password-policy'
     },
     notifications: {
         label: 'Notifications',
@@ -86,10 +90,11 @@
 
             {{ forms.textField({
                 label: 'Redirect',
+                instructions: 'Where users are sent afterwards. Can be overridden in your template with `redirect`.',
                 id: 'deleteAccountRedirect',
                 name: 'settings[deleteAccountRedirect]',
                 value: settings['deleteAccountRedirect'],
-                instructions: 'Can be overwritten at template level using `redirect`'
+                placeholder: '/'
             }) }}
 
             {# {{ forms.elementSelectField({
@@ -121,10 +126,11 @@
 
             {{ forms.textField({
                 label: 'Redirect',
+                instructions: 'Where users are sent afterwards. Can be overridden in your template with `redirect`.',
                 id: 'deactivateAccountRedirect',
                 name: 'settings[deactivateAccountRedirect]',
                 value: settings['deactivateAccountRedirect'],
-                instructions: 'Can be overwritten at template level using `redirect`'
+                placeholder: '/'
             }) }}
 
         </div>
@@ -205,10 +211,11 @@
 
             {{ forms.textField({
                 label: 'Redirect',
+                instructions: 'Where users are sent afterwards. Can be overridden in your template with `redirect`.',
                 id: 'magicLinkRedirect',
                 name: 'settings[magicLinkRedirect]',
                 value: settings['magicLinkRedirect'],
-                instructions: 'Can be overwritten at template level using `redirect`'
+                placeholder: '/'
             }) }}
 
         </div>
@@ -252,12 +259,14 @@
 
         </div>
 
-        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+    </div>
 
-        <h2>Password Policy</h2>
+    <div id="password-policy" class="hidden">
+
+        <h2>Length &amp; Characters</h2>
 
         {{ forms.lightswitchField({
-            label: 'Enforce password rules when users create or change a password',
+            label: 'Enforce a length and character make-up',
             id: 'passwordForcePolicy',
             name: 'settings[passwordForcePolicy]',
             on: settings['passwordForcePolicy'],
@@ -267,28 +276,32 @@
         <div id="passwordForcePolicy-options">
 
             {{ forms.textField({
-                label: 'Password Minimum Length',
+                label: 'Minimum Length',
+                instructions: 'Can’t be lower than 6, which is Craft’s own minimum.',
                 id: 'passwordForcePolicyMin',
                 name: 'settings[passwordForcePolicyMin]',
-                value: settings['passwordForcePolicyMin']
+                value: settings['passwordForcePolicyMin'],
+                size: 4
             }) }}
 
             {{ forms.textField({
-                label: 'Password Maximum Length',
+                label: 'Maximum Length',
+                instructions: '0 for no limit. Craft caps at 160.',
                 id: 'passwordForcePolicyMax',
                 name: 'settings[passwordForcePolicyMax]',
-                value: settings['passwordForcePolicyMax']
+                value: settings['passwordForcePolicyMax'],
+                size: 4
             }) }}
 
             {{ forms.checkboxSelectField({
-                label: 'Password Rules',
+                label: 'Required Characters',
                 id: 'passwordForcePolicyRules',
                 name: 'settings[passwordForcePolicyRules]',
                 options: [
-                    { value: 'lowercase', label: 'At least one lower case character (a-z)' },
-                    { value: 'uppercase', label: 'At least one upper case character (A-Z)' },
-                    { value: 'numeric', label: 'At least one numeric character (0-9)' },
-                    { value: 'symbol', label: 'At least one symbol character (@,#,$ etc)' }
+                    { value: 'lowercase', label: 'A lower case character (a-z)' },
+                    { value: 'uppercase', label: 'An upper case character (A-Z)' },
+                    { value: 'numeric', label: 'A number (0-9)' },
+                    { value: 'symbol', label: 'A symbol (@, #, $ etc)' }
                 ],
                 values: settings['passwordForcePolicyRules'],
                 showAllOption: false
@@ -296,11 +309,236 @@
 
         </div>
 
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+
+        <h2>Password Strength</h2>
+
+        {{ forms.lightswitchField({
+            label: 'Show a password strength indicator',
+            instructions: 'Adds a strength meter and checklist to control panel password fields. For front end use, see the [documentation](https://github.com/bymayo/craft-porter/blob/craft-5/README.md#strength-indicator).',
+            id: 'passwordStrengthIndicator',
+            name: 'settings[passwordStrengthIndicator]',
+            on: settings['passwordStrengthIndicator'],
+            toggle: 'passwordStrengthIndicator-options'
+        }) }}
+
+        <div id="passwordStrengthIndicator-options">
+
+            {{ forms.selectField({
+                label: 'Minimum Strength',
+                id: 'passwordStrengthMinScore',
+                name: 'settings[passwordStrengthMinScore]',
+                value: settings['passwordStrengthMinScore'],
+                options: [
+                    { value: 0, label: 'Don’t enforce' },
+                    { value: 1, label: 'Weak' },
+                    { value: 2, label: 'Fair' },
+                    { value: 3, label: 'Good' },
+                    { value: 4, label: 'Strong' }
+                ]
+            }) }}
+
+            {{ forms.lightswitchField({
+                label: 'Add a CSP nonce to the indicator script',
+                instructions: 'The indicator needs a small inline script, which a Content Security Policy will block. Switching this on stamps a nonce on it, which your CSP header then needs to include. See the [documentation](https://github.com/bymayo/craft-porter/blob/craft-5/README.md#strength-indicator).',
+                id: 'passwordCspNonce',
+                name: 'settings[passwordCspNonce]',
+                on: settings['passwordCspNonce']
+            }) }}
+
+        </div>
+
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+
+        <h2>Breach Check</h2>
+
+        {{ forms.lightswitchField({
+            label: 'Check against Have I Been Pwned',
+            instructions: 'Rejects passwords found in a known data breach.',
+            id: 'passwordPwned',
+            name: 'settings[passwordPwned]',
+            on: settings['passwordPwned'],
+            toggle: 'passwordPwned-options'
+        }) }}
+
+        <div id="passwordPwned-options">
+
+            {{ forms.selectField({
+                label: 'If the check can’t be reached',
+                id: 'passwordPwnedFailMode',
+                name: 'settings[passwordPwnedFailMode]',
+                value: settings['passwordPwnedFailMode'],
+                options: [
+                    { value: 'open', label: 'Allow the password' },
+                    { value: 'closed', label: 'Reject the password' }
+                ]
+            }) }}
+
+        </div>
+
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+
+        <h2>Blocklist</h2>
+
+        {{ forms.lightswitchField({
+            label: 'Block easily guessed passwords',
+            id: 'passwordBlocklist',
+            name: 'settings[passwordBlocklist]',
+            on: settings['passwordBlocklist'],
+            toggle: 'passwordBlocklist-options'
+        }) }}
+
+        <div id="passwordBlocklist-options">
+
+            {{ forms.checkboxSelectField({
+                label: 'Block',
+                id: 'passwordBlocklistSources',
+                name: 'settings[passwordBlocklistSources]',
+                options: [
+                    { value: 'userDetails', label: 'The user’s own username, name and email' },
+                    { value: 'siteName', label: 'The site name' },
+                    { value: 'substitutions', label: 'Character swaps, so “password” also blocks “P4ssw0rd”' }
+                ],
+                values: settings['passwordBlocklistSources'],
+                showAllOption: false
+            }) }}
+
+            {{ forms.textareaField({
+                label: 'Banned Words',
+                instructions: 'One per line. Words under 3 characters are ignored.',
+                id: 'passwordBlocklistWords',
+                name: 'settings[passwordBlocklistWords]',
+                value: settings['passwordBlocklistWords'],
+                rows: 4
+            }) }}
+
+        </div>
+
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+
+        <h2>Password History</h2>
+
+        {{ forms.lightswitchField({
+            label: 'Stop users reusing old passwords',
+            instructions: 'Only remembers passwords changed from now on.',
+            id: 'passwordHistory',
+            name: 'settings[passwordHistory]',
+            on: settings['passwordHistory'],
+            toggle: 'passwordHistory-options'
+        }) }}
+
+        <div id="passwordHistory-options">
+
+            {{ forms.textField({
+                label: 'Passwords To Remember',
+                instructions: 'Between 1 and 24. Higher numbers make saving slower.',
+                id: 'passwordHistoryCount',
+                name: 'settings[passwordHistoryCount]',
+                value: settings['passwordHistoryCount'],
+                size: 4
+            }) }}
+
+        </div>
+
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+
+        <h2>Password Expiry</h2>
+
+        {{ forms.lightswitchField({
+            label: 'Expire passwords after a set period',
+            instructions: 'Requires a CRON to function. See the [documentation](https://github.com/bymayo/craft-porter/blob/craft-5/README.md#password-expiry).',
+            id: 'passwordExpiry',
+            name: 'settings[passwordExpiry]',
+            on: settings['passwordExpiry'],
+            toggle: 'passwordExpiry-options'
+        }) }}
+
+        <div id="passwordExpiry-options">
+
+            {% set expiryInput %}
+                <div class="flex">
+                    <div>
+                        {{ forms.text({
+                            id: 'passwordExpiryAmount',
+                            name: 'settings[passwordExpiryAmount]',
+                            value: settings['passwordExpiryAmount'],
+                            size: 4
+                        }) }}
+                    </div>
+                    <div>
+                        {{ forms.select({
+                            id: 'passwordExpiryPeriod',
+                            name: 'settings[passwordExpiryPeriod]',
+                            value: settings['passwordExpiryPeriod'],
+                            options: [
+                                { value: 'days', label: 'Day(s)' },
+                                { value: 'weeks', label: 'Week(s)' },
+                                { value: 'months', label: 'Month(s)' },
+                                { value: 'years', label: 'Year(s)' }
+                            ]
+                        }) }}
+                    </div>
+                </div>
+            {% endset %}
+
+            {{ forms.field({
+                label: 'Expire After',
+                id: 'passwordExpiryAmount'
+            }, expiryInput) }}
+
+            {{ forms.textField({
+                label: 'Warn This Many Days Before',
+                instructions: 'Sends a “Password Expiring Soon” email, which can be switched on and edited on the [Notifications](' ~ cpUrl('settings/plugins/porter') ~ '#email-notifications) tab.',
+                id: 'passwordExpiryWarningDays',
+                name: 'settings[passwordExpiryWarningDays]',
+                value: settings['passwordExpiryWarningDays'],
+                size: 4
+            }) }}
+
+            {{ forms.textField({
+                label: 'Redirect',
+                instructions: 'Where front end users with an expired password are sent. Leave blank to handle it in your template with `craft.porter.passwordExpired`. See the [documentation](https://github.com/bymayo/craft-porter/blob/craft-5/README.md#password-expiry).',
+                id: 'passwordExpiryFrontEndRedirect',
+                name: 'settings[passwordExpiryFrontEndRedirect]',
+                value: settings['passwordExpiryFrontEndRedirect'],
+                placeholder: 'set-password'
+            }) }}
+
+        </div>
+
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+
+        <h2>Exemptions</h2>
+
+        {{ forms.lightswitchField({
+            label: 'Exempt admins',
+            instructions: 'Applies to all Password Policy settings.',
+            id: 'passwordExemptAdmins',
+            name: 'settings[passwordExemptAdmins]',
+            on: settings['passwordExemptAdmins']
+        }) }}
+
+        {% set userGroups = [] %}
+        {% for group in craft.app.userGroups.getAllGroups() %}
+            {% set userGroups = userGroups|merge([{ value: group.uid, label: group.name }]) %}
+        {% endfor %}
+
+        {% if userGroups %}
+            {{ forms.checkboxSelectField({
+                label: 'Exempt These Groups',
+                id: 'passwordExemptGroups',
+                name: 'settings[passwordExemptGroups]',
+                options: userGroups,
+                values: settings['passwordExemptGroups'],
+                showAllOption: false
+            }) }}
+        {% endif %}
+
     </div>
 
     <div id="email-notifications" class="hidden">
 
-        <h2>Email Notifications</h2>
+        <h2>Account</h2>
 
         {{ forms.lightswitchField({
             label: 'Welcome Email',
@@ -308,22 +546,6 @@
             id: 'emailWelcome',
             name: 'settings[emailWelcome]',
             on: settings['emailWelcome']
-        }) }}
-
-        {{ forms.lightswitchField({
-            label: 'New Device Login Detected',
-            instructions: 'Sent when a user signs in from a new IP or device.',
-            id: 'emailNewDeviceLogin',
-            name: 'settings[emailNewDeviceLogin]',
-            on: settings['emailNewDeviceLogin']
-        }) }}
-
-        {{ forms.lightswitchField({
-            label: 'Password Changed',
-            instructions: 'Sent when a user’s password is changed.',
-            id: 'emailPasswordChanged',
-            name: 'settings[emailPasswordChanged]',
-            on: settings['emailPasswordChanged']
         }) }}
 
         {{ forms.lightswitchField({
@@ -367,14 +589,6 @@
         }) }}
 
         {{ forms.lightswitchField({
-            label: 'Failed Login Attempts',
-            instructions: 'Sent when consecutive failed sign in attempts cross the configured threshold.',
-            id: 'emailFailedLoginAttempts',
-            name: 'settings[emailFailedLoginAttempts]',
-            on: settings['emailFailedLoginAttempts']
-        }) }}
-
-        {{ forms.lightswitchField({
             label: 'Inactive Account Reminder',
             instructions: 'Sent when a user hasn’t signed in for a while, before their account is deactivated.',
             id: 'emailInactiveAccountReminder',
@@ -382,6 +596,82 @@
             on: settings['emailInactiveAccountReminder']
         }) }}
 
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+
+        <h2>Sign In</h2>
+
+        {{ forms.lightswitchField({
+            label: 'New Device Login Detected',
+            instructions: 'Sent when a user signs in from a new IP or device.',
+            id: 'emailNewDeviceLogin',
+            name: 'settings[emailNewDeviceLogin]',
+            on: settings['emailNewDeviceLogin']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Failed Login Attempts',
+            instructions: 'Sent when consecutive failed sign in attempts cross the configured threshold.',
+            id: 'emailFailedLoginAttempts',
+            name: 'settings[emailFailedLoginAttempts]',
+            on: settings['emailFailedLoginAttempts']
+        }) }}
+
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
+
+        <h2>Password</h2>
+
+        {{ forms.lightswitchField({
+            label: 'Password Changed',
+            instructions: 'Sent when a user’s password is changed.',
+            id: 'emailPasswordChanged',
+            name: 'settings[emailPasswordChanged]',
+            on: settings['emailPasswordChanged']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Password Expiring Soon',
+            instructions: 'Sent before a user’s password expires, so they can change it before being forced to.',
+            id: 'emailPasswordExpiring',
+            name: 'settings[emailPasswordExpiring]',
+            on: settings['emailPasswordExpiring']
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Password Expired',
+            instructions: 'Sent when a user’s password expires and a reset is required.',
+            id: 'emailPasswordExpired',
+            name: 'settings[emailPasswordExpired]',
+            on: settings['emailPasswordExpired']
+        }) }}
+
     </div>
 
 {% endblock %}
+
+{% js %}
+// Links in field instructions that point at another tab (e.g. #email-notifications)
+// only change the hash on their own, which Craft's tab manager ignores once the
+// page has loaded. Forward the click to the real tab so the panel actually switches.
+document.addEventListener('click', function (event) {
+
+    var link = event.target.closest ? event.target.closest('a[href*="#"]') : null;
+
+    if (!link || !link.hash || link.getAttribute('role') === 'tab') {
+        return;
+    }
+
+    if (link.pathname !== window.location.pathname) {
+        return;
+    }
+
+    var tab = document.querySelector('a[role="tab"][href="' + link.hash + '"]');
+
+    if (!tab) {
+        return;
+    }
+
+    event.preventDefault();
+    tab.click();
+
+});
+{% endjs %}
