@@ -1,5 +1,11 @@
 # Porter Changelog
 
+## 5.3.2 - 2026-09-01
+
+### Added
+- Magic link registration, so an unrecognised email creates the account and signs the user in. No password is ever chosen ([#7](https://github.com/bymayo/craft-porter/issues/7))
+- `New User Redirect`, where brand new accounts land. Override it per form with `newUserRedirect`
+
 ## 5.3.1 - 2026-08-28
 
 > [!WARNING]

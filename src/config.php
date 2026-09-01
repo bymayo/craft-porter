@@ -39,6 +39,9 @@ return [
     'magicLinkFrontEnd' => false,
     'magicLinkExpirySeconds' => '300',
     'magicLinkRedirect' => '/', // Where users are sent afterwards
+    'magicLinkRegister' => false, // Create an account when the email doesn't match a user
+    'magicLinkRegisterGroups' => null, // User group UIDs to assign new accounts to
+    'magicLinkRegisterRedirect' => '/', // Where brand new users are sent, blank to use the above
 
     // Email
     'emailBurners' => false,

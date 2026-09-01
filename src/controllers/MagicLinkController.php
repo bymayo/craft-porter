@@ -73,7 +73,27 @@ class MagicLinkController extends Controller
 
       if ($result)
       {
+
+          $settings = Porter::getInstance()->helper->settings();
+
+          // Brand new accounts can go somewhere of their own, so a sign up
+          // can land on a welcome or profile page rather than the usual spot.
+          // The template's override, stored on the token, wins over the setting.
+          if ($result === 'new')
+          {
+
+              $newUserRedirect = Porter::getInstance()->magicLink->newUserRedirect()
+                  ?: $settings->magicLinkRegisterRedirect;
+
+              if ($newUserRedirect)
+              {
+                  return $this->redirect(UrlHelper::siteUrl($newUserRedirect));
+              }
+
+          }
+
           return $this->redirect(UrlHelper::siteUrl(Craft::$app->getConfig()->getGeneral()->getPostLoginRedirect()));
+
       }
 
    }

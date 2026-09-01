@@ -18,6 +18,7 @@ class MagicLink extends Component
 
     private $settings;
     private $defaultTemplateProperties;
+    private ?string $newUserRedirect = null;
 
     public function init(): void
     {
@@ -26,6 +27,7 @@ class MagicLink extends Component
 
         $this->defaultTemplateProperties = array(
             'redirect' => $this->settings->magicLinkRedirect,
+            'newUserRedirect' => $this->settings->magicLinkRegisterRedirect,
             'alertClass' => 'porter__alert',
             'fieldContainerClass' => 'porter__field-container',
             'fieldLabelClass' => 'porter__field-label',
@@ -78,7 +80,20 @@ class MagicLink extends Component
 
             $user = $email ? Craft::$app->getUsers()->getUserByUsernameOrEmail($email) : null;
 
-            $token = $user ? $this->createToken($user) : false;
+            $isNew = false;
+
+            // Passwordless sign up: no account yet, so make one and send them
+            // a link. The link is what proves they own the address.
+            if (!$user && $email && $this->registrationEnabled())
+            {
+
+               $user = $this->registerUser($email, $request);
+
+               $isNew = $user !== null;
+
+            }
+
+            $token = $user ? $this->createToken($user, $isNew, $this->postedNewUserRedirect($request)) : false;
 
             if ($token)
             {
@@ -118,6 +133,45 @@ class MagicLink extends Component
 
    }
 
+   /**
+    * Where a brand new account should land, once its token has been spent.
+    *
+    * Only meaningful straight after validateToken() returned 'new', since the
+    * token row is deleted as it's used.
+    */
+   public function newUserRedirect(): ?string
+   {
+      return $this->newUserRedirect;
+   }
+
+   /**
+    * The template's `newUserRedirect` override, if there is one.
+    *
+    * Read through getValidatedBodyParam so a tampered form field can't turn
+    * this into an open redirect - Craft hashes the value on the way out and
+    * refuses it here if it doesn't match.
+    */
+   private function postedNewUserRedirect($request): ?string
+   {
+
+      if (!$request || !$request->getIsPost())
+      {
+         return null;
+      }
+
+      try
+      {
+         $redirect = $request->getValidatedBodyParam('newUserRedirect');
+      }
+      catch (\yii\web\BadRequestHttpException $e)
+      {
+         return null;
+      }
+
+      return $redirect ?: null;
+
+   }
+
    public function invalidateTokens($user)
    {
 
@@ -136,7 +190,7 @@ class MagicLink extends Component
 
    }
 
-   public function createToken($user)
+   public function createToken($user, bool $isNew = false, ?string $newUserRedirect = null)
    {
 
         if (!$user || $user->admin || (!$this->settings->magicLinkControlPanel && $user->can('accessCp')))
@@ -158,6 +212,12 @@ class MagicLink extends Component
         // Remembered so the link lands them where they asked from, rather
         // than guessing from whether they happen to have control panel access.
         $record->cpLogin = Craft::$app->getRequest()->getIsCpRequest();
+        $record->newUser = $isNew;
+
+        // Stored on the token rather than the session: the link is opened in
+        // a fresh request, often on a different device to the one that asked
+        // for it, so there's no session to carry it.
+        $record->newUserRedirect = $isNew ? $newUserRedirect : null;
 
         $db = Craft::$app->getDb();
         $transaction = $db->beginTransaction();
@@ -180,6 +240,108 @@ class MagicLink extends Component
             throw $e;
 
         }
+
+   }
+
+   /**
+    * Whether a magic link request may create a missing account.
+    *
+    * Gated on Craft's own public registration setting, so this can't be used
+    * to create users on a site that has deliberately switched it off.
+    */
+   public function registrationEnabled(): bool
+   {
+
+      if (!$this->settings->magicLink || !$this->settings->magicLinkRegister)
+      {
+         return false;
+      }
+
+      $users = Craft::$app->getProjectConfig()->get('users') ?? [];
+
+      return (bool) ($users['allowPublicRegistration'] ?? false);
+
+   }
+
+   /**
+    * Creates an account for a passwordless sign up.
+    *
+    * Active rather than pending, because the emailed link is what verifies
+    * the address, and canSignInWithLink() refuses pending accounts.
+    */
+   public function registerUser(string $email, $request = null): ?User
+   {
+
+      $user = new User();
+      $user->email = $email;
+      $user->username = $email;
+      $user->active = true;
+      $user->newPassword = $this->generatePassword();
+
+      if ($request)
+      {
+         $user->setFieldValuesFromRequest('fields');
+      }
+
+      // Saved without validation on purpose: the password is machine
+      // generated, so running it through the password policy would be
+      // pointless, and would fire a Have I Been Pwned lookup on every sign up.
+      if (!Craft::$app->getElements()->saveElement($user, false))
+      {
+
+         Porter::warn('[Magic Link] Couldn’t register ' . $email . ': ' . implode(' ', $user->getErrorSummary(true)));
+
+         return null;
+
+      }
+
+      $groupIds = $this->registrationGroupIds();
+
+      if ($groupIds)
+      {
+         Craft::$app->getUsers()->assignUserToGroups($user->id, $groupIds);
+      }
+
+      return $user;
+
+   }
+
+   /**
+    * A password the user will never see or need.
+    */
+   public function generatePassword(): string
+   {
+      return Craft::$app->getSecurity()->generateRandomString(32);
+   }
+
+   /**
+    * The groups new accounts are put in.
+    */
+   public function registrationGroupIds(): array
+   {
+
+      $uids = $this->settings->magicLinkRegisterGroups;
+
+      if (!is_array($uids) || !$uids)
+      {
+         return [];
+      }
+
+      $ids = [];
+
+      foreach ($uids as $uid)
+      {
+
+         $group = Craft::$app->getUserGroups()->getGroupByUid($uid);
+
+         if ($group)
+         {
+            $ids[] = $group->id;
+         }
+
+      }
+
+      return $ids;
 
    }
 
@@ -279,7 +441,14 @@ class MagicLink extends Component
             if (Craft::$app->getUser()->login($user))
             {
 
-                return $query->cpLogin ? 'cp' : true;
+                if ($query->cpLogin)
+                {
+                    return 'cp';
+                }
+
+                $this->newUserRedirect = $query->newUserRedirect;
+
+                return $query->newUser ? 'new' : true;
 
             }
 

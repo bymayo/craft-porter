@@ -218,6 +218,44 @@
                 placeholder: '/'
             }) }}
 
+            {{ forms.lightswitchField({
+                label: 'Register New Users',
+                instructions: 'Creates an account when the email isn’t recognised. Requires public registration in [User Settings](' ~ cpUrl('settings/users/settings') ~ ').',
+                id: 'magicLinkRegister',
+                name: 'settings[magicLinkRegister]',
+                on: settings['magicLinkRegister'],
+                toggle: 'magicLinkRegister-options'
+            }) }}
+
+            <div id="magicLinkRegister-options">
+
+                {% set magicLinkGroups = [] %}
+                {% for group in craft.app.userGroups.getAllGroups() %}
+                    {% set magicLinkGroups = magicLinkGroups|merge([{ value: group.uid, label: group.name }]) %}
+                {% endfor %}
+
+                {% if magicLinkGroups %}
+                    {{ forms.checkboxSelectField({
+                        label: 'Add New Users To',
+                        id: 'magicLinkRegisterGroups',
+                        name: 'settings[magicLinkRegisterGroups]',
+                        options: magicLinkGroups,
+                        values: settings['magicLinkRegisterGroups'],
+                        showAllOption: false
+                    }) }}
+                {% endif %}
+
+                {{ forms.textField({
+                    label: 'New User Redirect',
+                    instructions: 'Where new accounts are sent. Can be overridden in your template with `newUserRedirect`.',
+                    id: 'magicLinkRegisterRedirect',
+                    name: 'settings[magicLinkRegisterRedirect]',
+                    value: settings['magicLinkRegisterRedirect'],
+                    placeholder: '/'
+                }) }}
+
+            </div>
+
         </div>
 
         <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">

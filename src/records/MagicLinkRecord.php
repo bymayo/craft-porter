@@ -13,6 +13,8 @@ use craft\db\ActiveRecord;
  * @property int $userId
  * @property string $token
  * @property bool $cpLogin
+ * @property bool $newUser
+ * @property string|null $newUserRedirect
  */
 class MagicLinkRecord extends ActiveRecord
 {

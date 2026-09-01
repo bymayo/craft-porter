@@ -20,6 +20,7 @@ Porter is a Craft CMS plugin that is the missing toolbox for all things users.
 - [Magic Link](#magic-link)
     - Sign in via a link emailed to the user's inbox
     - Front end and/or control panel login, with configurable expiry
+    - Optional passwordless sign up, creating the account on first request
 - [Block Burner / Disposable Emails](#block-burner--disposable-emails)
     - 22,000+ disposable email domains blocked
     - Domain validity, syntax and MX record checks
@@ -138,6 +139,7 @@ Sign in via a link emailed to the user's inbox. Enable under `Settings > Porter 
 | Property | Default | Description |
 |---|---|---|
 | `redirect` | Plugin redirect setting | Where users are sent afterwards |
+| `newUserRedirect` | Plugin new user redirect setting | Where brand new accounts are sent |
 | `alertClass` | `porter__alert` | Class for the success/error flash |
 | `fieldClass` | `porter__field` | Class for the email input |
 | `fieldContainerClass` | `porter__field-container` | Class for the field wrapper |
@@ -148,6 +150,22 @@ Sign in via a link emailed to the user's inbox. Enable under `Settings > Porter 
 For full markup control, copy `bymayo/porter/src/templates/components/magicLinkForm.twig`. Defaults are available via `craft.porter.magicLinkFormProperties()`.
 
 Switch on `Control Panel Access` and a `Sign in with a magic link` button appears on the control panel login screen, alongside the passkey option.
+
+#### Registering New Users
+
+Switch on `Register New Users` and an unrecognised email creates the account rather than failing. The same form becomes sign up and sign in, and no password is ever chosen.
+
+The link is what proves the address belongs to them, so the account is created active rather than pending. It gets a random password the user never sees or needs. New users are added to the groups picked under `Add New Users To`, and land on `New User Redirect` instead of the usual one, so you can send them to a welcome or profile page.
+
+Craft's own public registration must be switched on under `Settings > Users`. Porter won't create accounts on a site that has deliberately turned it off.
+
+Override the destination per form:
+
+```twig
+{{ craft.porter.magicLinkForm({
+    newUserRedirect: '/welcome',
+}) }}
+```
 
 > ⚠️ Admins cannot use magic links. Nor can accounts that are suspended, locked, pending verification, flagged for a password reset, or using two-step verification, since a link can't present a second factor.
 

@@ -85,6 +85,12 @@ class Settings extends Model
 
     public $magicLinkRedirect = '/';
 
+    public $magicLinkRegister = 0;
+
+    public $magicLinkRegisterGroups = null;
+
+    public $magicLinkRegisterRedirect = '/';
+
     // Email
 
     public $emailBurners = 0;
@@ -183,6 +189,7 @@ class Settings extends Model
                     'magicLink',
                     'magicLinkControlPanel',
                     'magicLinkFrontEnd',
+                    'magicLinkRegister',
                     'emailBurners',
                     'passwordConfirm',
                     'passwordForcePolicy',
@@ -248,6 +255,7 @@ class Settings extends Model
                     'deleteAccountRedirect', 
                     'deactivateAccountRedirect',
                     'magicLinkRedirect',
+                    'magicLinkRegisterRedirect',
                     'emailsBurnersVerifierApiKey',
                     'passwordPwnedFailMode',
                     'passwordExpiryPeriod',
@@ -260,6 +268,7 @@ class Settings extends Model
                 [
                     // 'deleteAccountTransfer',
                     'passwordForcePolicyRules',
+                    'magicLinkRegisterGroups',
                     'passwordBlocklistSources',
                     'passwordExemptGroups'
                 ], 

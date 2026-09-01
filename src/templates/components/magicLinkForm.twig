@@ -6,6 +6,10 @@
         {{ actionInput('porter/magic-link/request') }}
         {{ redirectInput(redirect) }}
 
+        {% if newUserRedirect %}
+            {{ hiddenInput('newUserRedirect', newUserRedirect|hash) }}
+        {% endif %}
+
         <div class="{{ fieldContainerClass }}">
 
             <label for="emailField" class="{{ fieldLabelClass }}">
