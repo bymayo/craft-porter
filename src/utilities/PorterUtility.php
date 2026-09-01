@@ -28,7 +28,7 @@ class PorterUtility extends Utility
 
    public static function icon(): ?string
    {
-      return Craft::getAlias('@bymayo/porter/icon-mask.svg');
+      return Craft::getAlias('@bymayo/porter/icon-solid.svg');
    }
 
    /**

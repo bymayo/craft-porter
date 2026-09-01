@@ -1,12 +1,22 @@
 # Porter Changelog
 
+## 5.3.5 - 2026-09-01
+
+> [!WARNING]
+> Fixes a privilege escalation. On sites with `allowAdminChanges` on, any logged-in user could change Porter's settings. Review yours after upgrading.
+
+### Security
+- Plugin settings could be saved by any logged-in user, including front-end members. `porter/settings/save` only required a POST, and assigned posted values unsafely. It now requires an admin in the control panel, and only accepts known settings. Sites with `allowAdminChanges` off were not writable, as Craft refuses the change
+- The settings page was readable by any logged-in user, exposing every configured value. It now requires an admin in the control panel. This applied whatever `allowAdminChanges` was set to
+- Removed a redundant `allowAnonymous` from the delete account controller. Not exploitable, as the action only acts on the signed-in user
+
+### Changed
+- The `Porter` utility uses its own icon
+
 ## 5.3.4 - 2026-09-01
 
 > [!WARNING]
 > Burner email blocking no longer uses the Verifier API, and `emailsBurnersVerifierApiKey` has been removed. The check now runs against a domain list on your own server instead of a third-party service.
-
-> [!WARNING]
-> Porter's two utilities are now one, so `utility:porter-password-retention` and `utility:porter-disposable-domains` are replaced by `utility:porter`. Re-grant it to any non-admin group that had access. Admins are unaffected.
 
 ### Added
 - Burner email blocking works without an API key or an account. A list of 75,000+ disposable domains is downloaded when you switch the feature on, alongside syntax and MX checks ([#13](https://github.com/bymayo/craft-porter/issues/13))

@@ -289,8 +289,13 @@ class Settings extends Model
                 'string'
             ],
             [
+                // Not wired up yet, but the field renders on the settings
+                // page, so it stays assignable.
+                ['deleteAccountTransfer'],
+                'safe'
+            ],
+            [
                 [
-                    // 'deleteAccountTransfer',
                     'passwordForcePolicyRules',
                     'magicLinkRegisterGroups',
                     'passwordBlocklistSources',

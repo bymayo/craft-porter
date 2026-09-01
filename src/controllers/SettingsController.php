@@ -13,6 +13,12 @@ class SettingsController extends Controller
     public function actionRender()
     {
 
+        // Craft gates plugin settings behind the control panel and an admin.
+        // Porter registers its own route for this page, so the same guards
+        // have to be applied here rather than inherited.
+        $this->requireCpRequest();
+        $this->requireAdmin(false);
+
         $settings = Porter::$plugin->settings;
 
         return $this->renderTemplate(
@@ -28,13 +34,18 @@ class SettingsController extends Controller
     {
 
         $this->requirePostRequest();
+        $this->requireCpRequest();
+        $this->requireAdmin();
 
-        $request = Craft::$app->getRequest();        
+        $request = Craft::$app->getRequest();
 
         $postedSettings = $request->getBodyParam('settings', []);
 
         $settings = Porter::$plugin->settings;
-        $settings->setAttributes($postedSettings, false);
+
+        // Safe attributes only. Assigning unsafely would let anything posted
+        // reach any public property on the model.
+        $settings->setAttributes($postedSettings);
 
         $settings->validate();
 

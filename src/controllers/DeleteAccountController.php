@@ -10,8 +10,6 @@ use craft\web\Controller;
 class DeleteAccountController extends Controller
 {
 
-    protected array|int|bool $allowAnonymous = ['delete'];
-
     public function actionDelete()
     {
 
