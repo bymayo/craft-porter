@@ -1,0 +1,81 @@
+{# Mirrors Craft's own login / forgot password screen so it doesn't look bolted on. #}
+
+{% extends '_layouts/basecp.twig' %}
+{% import '_includes/forms.twig' as forms %}
+
+{% set title = 'Sign in with a magic link'|t('porter') %}
+{% set bodyClass = 'login' %}
+
+{% set hasLogo = CraftEdition >= CraftPro and craft.rebrand.isLogoUploaded %}
+{% set flash = craft.app.session.getFlash('porter') %}
+
+{% block body %}
+    <header>
+        {% include '_layouts/components/system-info' %}
+    </header>
+
+    <main>
+
+        {% if hasLogo %}
+            {% set logo = craft.rebrand.logo %}
+            <h1>
+                {{ tag('img', {
+                    id: 'login-logo',
+                    src: logo.url,
+                    alt: systemName,
+                    width: logo.width,
+                    height: logo.height,
+                }) }}
+            </h1>
+        {% endif %}
+
+        <div class="login-container">
+            <div class="pane secondary login-form-container">
+
+                <form class="login-form" method="post" accept-charset="UTF-8">
+                    {{ csrfInput() }}
+                    {{ actionInput('porter/magic-link/request') }}
+                    {{ redirectInput('magic-link') }}
+
+                    {{ forms.textField({
+                        label: 'Email'|t('porter'),
+                        class: 'login-username',
+                        name: 'email',
+                        type: 'email',
+                        autocomplete: 'username',
+                        autocapitalize: false,
+                        autofocus: true,
+                        inputAttributes: {
+                            aria: {
+                                required: 'true',
+                            },
+                        },
+                    }) }}
+
+                    {{ forms.submitButton({
+                        class: ['fullwidth', 'last'],
+                        label: 'Send magic link'|t('porter'),
+                        spinner: true,
+                    }) }}
+
+                    {% if flash %}
+                        <div class="porter-magic-link__message">{{ flash }}</div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="login-alt-container">
+                        <a class="btn login-reset-back-btn chromeless porter-magic-link__back" href="{{ cpUrl('login') }}">
+                            <div class="inline-flex">
+                                <div class="label">{{ (craft.app.locale.getOrientation() == 'ltr' ? '← ' : ' →') ~ 'Back to sign in'|t('app') }}</div>
+                            </div>
+                        </a>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </main>
+{% endblock %}

@@ -296,7 +296,7 @@ class EmailNotifications extends Component
 
    }
 
-   public function sendInactiveAccountReminder(User $user, int $deactivateDays)
+   public function sendInactiveAccountReminder(User $user, int $deleteDays)
    {
 
       if (!$this->settings->emailInactiveAccountReminder || !$user->email)
@@ -310,7 +310,7 @@ class EmailNotifications extends Component
          array(
             'user' => $user,
             'lastLoginDate' => $user->lastLoginDate,
-            'deactivateDays' => $deactivateDays,
+            'deleteDays' => $deleteDays,
             'dateCreated' => new \DateTime()
          )
       );

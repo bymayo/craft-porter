@@ -43,7 +43,7 @@ class Settings extends Model
 
     public $inactiveAccountReminderDays = 365;
 
-    public $inactiveAccountDeactivateDays = 395;
+    public $inactiveAccountDeleteDays = 395;
 
     // Email Notifications
 
@@ -92,6 +92,8 @@ class Settings extends Model
     public $emailsBurnersVerifierApiKey = null;
 
     // Password
+
+    public $passwordConfirm = 0;
 
     public $passwordForcePolicy = 0;
 
@@ -182,6 +184,7 @@ class Settings extends Model
                     'magicLinkControlPanel',
                     'magicLinkFrontEnd',
                     'emailBurners',
+                    'passwordConfirm',
                     'passwordForcePolicy',
                     'passwordPwned',
                     'passwordStrengthIndicator',
@@ -202,7 +205,7 @@ class Settings extends Model
                     'passwordForcePolicyMax',
                     'emailFailedLoginAttemptsThreshold',
                     'inactiveAccountReminderDays',
-                    'inactiveAccountDeactivateDays',
+                    'inactiveAccountDeleteDays',
                     'passwordHistoryCount',
                     'passwordStrengthMinScore',
                     'passwordExpiryAmount',

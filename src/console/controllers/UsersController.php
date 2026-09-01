@@ -15,7 +15,7 @@ class UsersController extends Controller
 {
 
    /**
-    * Sends inactive-account reminder emails and deactivates accounts past
+    * Sends inactive-account reminder emails and soft deletes accounts past
     * the configured threshold. Skips admins and any user with CP access.
     */
    public function actionCleanupInactive(): int
@@ -23,7 +23,7 @@ class UsersController extends Controller
 
       $stats = Porter::getInstance()->inactiveAccounts->cleanupInactive();
 
-      $this->stdout("Sent {$stats['warned']} reminder email(s), deactivated {$stats['deactivated']} account(s).\n");
+      $this->stdout("Sent {$stats['warned']} reminder email(s), deleted {$stats['deleted']} account(s).\n");
 
       return ExitCode::OK;
 

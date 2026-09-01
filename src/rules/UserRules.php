@@ -47,7 +47,7 @@ class UserRules
          $rules[] = self::lengthRule($policy, $user);
       }
 
-      if ($policy->blocklistEnabled() || $policy->historyEnabled() || $policy->minScore() > 0 || $policy->lengthRulesEnabled())
+      if ($policy->confirmEnabled() || $policy->blocklistEnabled() || $policy->historyEnabled() || $policy->minScore() > 0 || $policy->lengthRulesEnabled())
       {
          $rules[] = [
             ['newPassword'],

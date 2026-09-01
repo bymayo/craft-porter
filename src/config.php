@@ -31,7 +31,7 @@ return [
     // Inactive Accounts
     'inactiveAccountCleanup' => false,
     'inactiveAccountReminderDays' => 365,
-    'inactiveAccountDeactivateDays' => 395,
+    'inactiveAccountDeleteDays' => 395,
 
     // Magic Link
     'magicLink' => false,
@@ -43,6 +43,9 @@ return [
     // Email
     'emailBurners' => false,
     'emailsBurnersVerifierApiKey' => null,
+
+    // Password - Confirmation
+    'passwordConfirm' => false,
 
     // Password - Length & Characters
     'passwordForcePolicy' => false,

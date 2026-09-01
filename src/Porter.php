@@ -20,6 +20,7 @@ use bymayo\porter\services\InactiveAccounts;
 use bymayo\porter\services\PasswordPolicy;
 use bymayo\porter\services\PasswordRetention;
 use bymayo\porter\services\Security;
+use bymayo\porter\assetbundles\porter\PorterMagicLinkAsset;
 use bymayo\porter\rules\UserRules;
 use bymayo\porter\utilities\PasswordRetentionUtility;
 use bymayo\porter\variables\PorterVariable;
@@ -28,6 +29,7 @@ use bymayo\porter\models\Settings;
 use Craft;
 use craft\base\Plugin;
 use craft\controllers\UsersController;
+use craft\helpers\Json;
 use craft\helpers\UrlHelper;
 use craft\services\Plugins;
 use craft\services\SystemMessages;
@@ -87,7 +89,7 @@ class Porter extends Plugin
     /**
      * @var string
      */
-    public string $schemaVersion = '1.4.0';
+    public string $schemaVersion = '1.5.0';
 
     /**
      * @var bool
@@ -184,7 +186,11 @@ class Porter extends Plugin
                     
                     $event->rules = array_merge(
                         [
-                            'settings/plugins/porter' => 'porter/settings/render'
+                            'settings/plugins/porter' => 'porter/settings/render',
+                            // Not under 'porter/', because Craft treats a CP
+                            // path starting with a plugin handle as a plugin
+                            // page and forces guests to log in first.
+                            'magic-link' => 'porter/magic-link/login'
                         ],
                         $event->rules
                     );
@@ -461,14 +467,42 @@ class Porter extends Plugin
                     return;
                 }
 
-                if (!Porter::getInstance()->passwordPolicy->strengthIndicatorEnabled()) {
+                $policy = Porter::getInstance()->passwordPolicy;
+
+                if ($policy->strengthIndicatorEnabled()) {
+                    $policy->registerIndicatorAssets();
+                } else {
+                    $policy->registerConfirmAssets();
+                }
+
+            }
+        );
+
+        Event::on(
+            View::class,
+            View::EVENT_BEFORE_RENDER_PAGE_TEMPLATE,
+            function (TemplateEvent $event) {
+
+                if (!in_array($event->template, ['login', 'login.twig'], true)) {
                     return;
                 }
 
-                // Pass the user whose password is being set, so the blocklist
-                // can be checked live here the same way it is on the front end.
-                Porter::getInstance()->passwordPolicy->registerIndicatorAssets(
-                    $this->_editedUser()
+                if (!$this->settings->magicLink || !$this->settings->magicLinkControlPanel) {
+                    return;
+                }
+
+                $view = Craft::$app->getView();
+
+                $view->registerAssetBundle(PorterMagicLinkAsset::class);
+
+                $view->registerScript(
+                    'window.porterMagicLink = ' . Json::encode([
+                        'linkText' => Craft::t('porter', 'Sign in with a magic link'),
+                        'url' => UrlHelper::cpUrl('magic-link')
+                    ]) . ';',
+                    View::POS_HEAD,
+                    [],
+                    'porter-magic-link-config'
                 );
 
             }
@@ -490,37 +524,6 @@ class Porter extends Plugin
     protected function createSettingsModel(): ?\craft\base\Model
     {
         return new Settings();
-    }
-
-    /**
-     * The user whose account is being edited in the control panel.
-     *
-     * Craft routes these as `myaccount/…` or `users/<id>/…`. Anything else
-     * (a new user, say) returns null, and the blocklist falls back to being
-     * checked on save.
-     *
-     * Safe to hand to the browser: whoever is on that page can already see
-     * the user's name and email on it.
-     */
-    private function _editedUser(): ?User
-    {
-
-        $segments = Craft::$app->getRequest()->getSegments();
-
-        if (!$segments) {
-            return null;
-        }
-
-        if ($segments[0] === 'myaccount') {
-            return Craft::$app->getUser()->getIdentity();
-        }
-
-        if ($segments[0] === 'users' && isset($segments[1]) && ctype_digit((string)$segments[1])) {
-            return Craft::$app->getUsers()->getUserById((int)$segments[1]);
-        }
-
-        return null;
-
     }
 
     /**

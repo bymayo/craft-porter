@@ -140,8 +140,8 @@
         <h2>Inactive Account Cleanup</h2>
 
         {{ forms.lightswitchField({
-            label: 'Automatically deactivate inactive accounts',
-            instructions: 'Warn and then deactivate accounts that haven’t signed in for a while. Admins and users with control panel access are skipped.',
+            label: 'Automatically delete inactive accounts',
+            instructions: 'Warn, then delete accounts that haven’t signed in for a while. Skips admins and anyone with control panel access. See the [documentation](https://github.com/bymayo/craft-porter/blob/craft-5/README.md#inactive-account-cleanup).',
             id: 'inactiveAccountCleanup',
             name: 'settings[inactiveAccountCleanup]',
             on: settings['inactiveAccountCleanup'],
@@ -160,11 +160,11 @@
             }) }}
 
             {{ forms.textField({
-                label: 'Deactivate after',
-                instructions: 'Days of inactivity before the account is deactivated.',
-                id: 'inactiveAccountDeactivateDays',
-                name: 'settings[inactiveAccountDeactivateDays]',
-                value: settings['inactiveAccountDeactivateDays'],
+                label: 'Delete after',
+                instructions: 'Days of inactivity before the account is deleted.',
+                id: 'inactiveAccountDeleteDays',
+                name: 'settings[inactiveAccountDeleteDays]',
+                value: settings['inactiveAccountDeleteDays'],
                 size: 4
             }) }}
 
@@ -262,6 +262,18 @@
     </div>
 
     <div id="password-policy" class="hidden">
+
+        <h2>Confirmation</h2>
+
+        {{ forms.lightswitchField({
+            label: 'Require a confirmation field',
+            instructions: 'Users have to type their new password twice. Add a `confirmPassword` field to your own forms.',
+            id: 'passwordConfirm',
+            name: 'settings[passwordConfirm]',
+            on: settings['passwordConfirm']
+        }) }}
+
+        <hr style="margin-left: calc(-1 * var(--padding)); margin-right: calc(-1 * var(--padding));">
 
         <h2>Length &amp; Characters</h2>
 
@@ -590,7 +602,7 @@
 
         {{ forms.lightswitchField({
             label: 'Inactive Account Reminder',
-            instructions: 'Sent when a user hasn’t signed in for a while, before their account is deactivated.',
+            instructions: 'Sent when a user hasn’t signed in for a while, before their account is deleted.',
             id: 'emailInactiveAccountReminder',
             name: 'settings[emailInactiveAccountReminder]',
             on: settings['emailInactiveAccountReminder']

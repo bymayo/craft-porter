@@ -160,26 +160,19 @@
             case 'maxLength':
                 return password.length <= rule.max;
 
-            case 'blocklist':
-                if (config && config.blocklistCheckable === false) {
+            case 'confirm':
+                var confirmField = document.querySelector('[data-porter-password-confirm]');
+                if (!confirmField || !confirmField.value) {
                     return null;
                 }
-                var swaps = !config || config.blocklistSubstitutions !== false;
-                var haystack = swaps ? normalise(password) : password.toLowerCase();
-                var words = (config && config.blocklist) || [];
-                for (var i = 0; i < words.length; i++) {
-                    var needle = swaps ? normalise(words[i]) : String(words[i]).toLowerCase();
-                    if (needle.length >= 3 && haystack.indexOf(needle) !== -1) {
-                        return false;
-                    }
-                }
-                return true;
+                return confirmField.value === password;
 
             case 'strength':
                 return score(password, config) >= rule.minScore;
 
             case 'history':
             case 'pwned':
+            case 'blocklist':
                 return null;
 
             default:
@@ -196,16 +189,12 @@
      * Whether a rule can only be judged on the server.
      *
      * History and breach lookups need the password sending somewhere, and the
-     * blocklist can't be checked when the word list is incomplete (the control
-     * panel withholds the edited user's own details).
+     * blocklist is judged on the server too, so the word list (which includes
+     * the user's own details) never has to reach the browser.
      */
-    function isServerOnly(rule, config) {
+    function isServerOnly(rule) {
 
-        if (rule.key === 'history' || rule.key === 'pwned') {
-            return true;
-        }
-
-        return rule.key === 'blocklist' && config && config.blocklistCheckable === false;
+        return rule.key === 'history' || rule.key === 'pwned' || rule.key === 'blocklist';
 
     }
 
@@ -238,7 +227,7 @@
             var deferredRules = [];
 
             config.rules.forEach(function (rule) {
-                (isServerOnly(rule, config) ? deferredRules : liveRules).push(rule);
+                (isServerOnly(rule) ? deferredRules : liveRules).push(rule);
             });
 
             // The pass/fail list — only rules the browser can actually judge,
@@ -322,7 +311,10 @@
 
         function render() {
 
-            var password = field.value || '';
+            // Re-resolved rather than closed over: Craft's Show toggle
+            // replaces the input with a clone.
+            var live = (field.id && document.getElementById(field.id)) || field;
+            var password = live.value || '';
             var current = password.length ? score(password, config) : null;
 
             if (current === null) {
@@ -373,7 +365,24 @@
 
         }
 
-        field.addEventListener('input', render);
+        // All delegated: the confirmation field is added by another script
+        // that may run later, and Craft's Show toggle replaces inputs with
+        // clones, so a directly bound listener would be lost.
+        document.addEventListener('input', function (event) {
+
+            var target = event.target;
+
+            if (!target) {
+                return;
+            }
+
+            if ((field.id && target.id === field.id) ||
+                (target.hasAttribute && target.hasAttribute('data-porter-password-confirm'))) {
+                render();
+            }
+
+        });
+
         render();
 
     }

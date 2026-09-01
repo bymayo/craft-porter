@@ -21,6 +21,7 @@ class PorterPasswordAsset extends AssetBundle
 
         $this->js = [
             'js/PorterPasswordStrength.js',
+            'js/PorterPasswordConfirm.js',
         ];
 
         $this->css = [

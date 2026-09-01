@@ -28,6 +28,11 @@ class PasswordPolicy extends Component
     */
    const HISTORY_MAX = 24;
 
+   /**
+    * The field name a confirmation is posted under.
+    */
+   const CONFIRM_FIELD = 'confirmPassword';
+
    private $settings;
 
    public function init(): void
@@ -61,6 +66,40 @@ class PasswordPolicy extends Component
 
    // Rules
    // =========================================================================
+
+   /**
+    * Whether a matching confirmation field is required.
+    */
+   public function confirmEnabled(): bool
+   {
+      return (bool) $this->settings->passwordConfirm;
+   }
+
+   /**
+    * The confirmation posted alongside the password, or null when this save
+    * didn't come from a posted form.
+    *
+    * Console commands, queue jobs and programmatic saves have nothing to
+    * confirm against, so they're deliberately left alone.
+    */
+   public function postedConfirmation(): ?string
+   {
+
+      if (!$this->confirmEnabled())
+      {
+         return null;
+      }
+
+      $request = Craft::$app->getRequest();
+
+      if ($request->getIsConsoleRequest() || $request->getBodyParam('newPassword') === null)
+      {
+         return null;
+      }
+
+      return (string) $request->getBodyParam(self::CONFIRM_FIELD, '');
+
+   }
 
    /**
     * Whether the length and character rules are switched on.
@@ -140,6 +179,7 @@ class PasswordPolicy extends Component
    {
 
       return $this->lengthRulesEnabled()
+         || $this->confirmEnabled()
          || $this->blocklistEnabled()
          || $this->historyEnabled()
          || $this->pwnedEnabled()
@@ -234,6 +274,14 @@ class PasswordPolicy extends Component
             ];
          }
 
+      }
+
+      if ($this->confirmEnabled())
+      {
+         $descriptors[] = [
+            'key' => 'confirm',
+            'label' => Craft::t('porter', 'Passwords match.')
+         ];
       }
 
       if ($this->blocklistEnabled())
@@ -370,6 +418,15 @@ class PasswordPolicy extends Component
             }
          }
 
+      }
+
+      $confirmation = $this->postedConfirmation();
+
+      if ($confirmation !== null && $confirmation !== $password)
+      {
+         $errors[] = $confirmation === ''
+            ? Craft::t('porter', 'Please confirm your password.')
+            : Craft::t('porter', 'Passwords don’t match.');
       }
 
       if ($this->blocklistEnabled())
@@ -673,24 +730,13 @@ class PasswordPolicy extends Component
    /**
     * The config handed to the strength indicator JS.
     */
-   public function indicatorConfig(?User $user = null): array
+   public function indicatorConfig(): array
    {
-
-      // The blocklist can only be checked client side when we have the full
-      // word list. In the control panel an admin may be editing somebody
-      // else, so the user's own details aren't sent — better to show that
-      // rule as "checked on save" than to show a ✓ the server will reject.
-      $blocklistCheckable = !$this->blocklistEnabled()
-         || !in_array('userDetails', $this->blocklistSources(), true)
-         || $user !== null;
 
       return [
          'rules' => $this->describeRules(),
          'minScore' => $this->minScore(),
          'common' => $this->commonPasswords(),
-         'blocklistCheckable' => $blocklistCheckable,
-         'blocklistSubstitutions' => in_array('substitutions', $this->blocklistSources(), true),
-         'blocklist' => $this->blocklistEnabled() ? $this->blocklistWords($user) : [],
          'labels' => [
             0 => $this->scoreLabel(0),
             1 => $this->scoreLabel(1),
@@ -707,7 +753,7 @@ class PasswordPolicy extends Component
    /**
     * Registers the indicator JS/CSS and its config, once per request.
     */
-   public function registerIndicatorAssets(?User $user = null): void
+   public function registerIndicatorAssets(): void
    {
 
       $view = Craft::$app->getView();
@@ -722,10 +768,49 @@ class PasswordPolicy extends Component
       }
 
       $view->registerScript(
-         'window.porterPasswordPolicy = ' . Json::encode($this->indicatorConfig($user)) . ';',
+         'window.porterPasswordPolicy = ' . Json::encode($this->indicatorConfig()) . ';',
          View::POS_HEAD,
          $options,
          'porter-password-policy-config'
+      );
+
+      $this->registerConfirmAssets();
+
+   }
+
+   /**
+    * Registers the confirmation field assets and config.
+    *
+    * Separate from the indicator, since the confirmation field is wanted
+    * whether or not the strength meter is switched on.
+    */
+   public function registerConfirmAssets(): void
+   {
+
+      if (!$this->confirmEnabled())
+      {
+         return;
+      }
+
+      $view = Craft::$app->getView();
+
+      $view->registerAssetBundle(PorterPasswordAsset::class);
+
+      $options = [];
+
+      if ($this->settings->passwordCspNonce)
+      {
+         $options['nonce'] = Porter::getInstance()->security->getNonce();
+      }
+
+      $view->registerScript(
+         'window.porterPasswordConfirm = ' . Json::encode([
+            'name' => self::CONFIRM_FIELD,
+            'label' => Craft::t('porter', 'Confirm Password')
+         ]) . ';',
+         View::POS_HEAD,
+         $options,
+         'porter-password-confirm-config'
       );
 
    }
@@ -760,7 +845,7 @@ class PasswordPolicy extends Component
       $defaults = $this->defaultIndicatorProperties();
       $properties = $properties ? array_merge($defaults, $properties) : $defaults;
 
-      $this->registerIndicatorAssets(Craft::$app->getUser()->getIdentity());
+      $this->registerIndicatorAssets();
 
       $view = Craft::$app->getView();
 

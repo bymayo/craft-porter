@@ -8,6 +8,7 @@ use bymayo\porter\records\MagicLinkRecord;
 
 use Craft;
 use craft\base\Component;
+use craft\elements\User;
 use craft\helpers\UrlHelper;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\Template;
@@ -143,11 +144,20 @@ class MagicLink extends Component
             return false;
         }
 
+        if (!$this->canSignInWithLink($user))
+        {
+            return false;
+        }
+
         $this->invalidateTokens($user);
 
         $record = new MagicLinkRecord();
         $record->userId = $user->id;
         $record->token = Craft::$app->getSecurity()->generateRandomString(64);
+
+        // Remembered so the link lands them where they asked from, rather
+        // than guessing from whether they happen to have control panel access.
+        $record->cpLogin = Craft::$app->getRequest()->getIsCpRequest();
 
         $db = Craft::$app->getDb();
         $transaction = $db->beginTransaction();
@@ -170,6 +180,62 @@ class MagicLink extends Component
             throw $e;
 
         }
+
+   }
+
+   /**
+    * Whether this user may be signed in by a magic link.
+    *
+    * Craft's own login runs these checks in User::authenticate(). A magic
+    * link calls Craft::$app->getUser()->login() directly, which only checks
+    * the user agent and IP, so without this a link would sign in accounts
+    * that are suspended, locked, pending, or flagged for a password reset.
+    */
+   public function canSignInWithLink(?User $user = null): bool
+   {
+
+      if (!$user)
+      {
+         return false;
+      }
+
+      // Mirrors the checks Craft runs in User::authenticate(). Not using
+      // craft\helpers\User::getAuthStatus(), which only exists in later 5.x
+      // releases and Porter supports ^5.0.
+      if ($user->getStatus() !== User::STATUS_ACTIVE)
+      {
+         // Inactive, archived, pending verification, or suspended.
+         return false;
+      }
+
+      if ($user->locked)
+      {
+         return false;
+      }
+
+      // Read through the service because UserQuery doesn't select
+      // `passwordResetRequired`, so it's false on a user loaded by ID.
+      // Without this a link would walk straight past password expiry.
+      if (Porter::getInstance()->passwordRetention->resetRequired($user))
+      {
+         return false;
+      }
+
+      if (Craft::$app->getRequest()->getIsCpRequest() && !$user->can('accessCp'))
+      {
+         return false;
+      }
+
+      // A link can't present a second factor, so allowing one would step
+      // around two-step verification entirely.
+      $auth = Craft::$app->getAuth();
+
+      if ($auth->hasActiveMethod($user) || $auth->is2faRequired($user))
+      {
+         return false;
+      }
+
+      return true;
 
    }
 
@@ -198,10 +264,22 @@ class MagicLink extends Component
         if (DateTimeHelper::currentTimeStamp() <= (DateTimeHelper::toDateTime($query->dateCreated)->format('U') + $this->settings->magicLinkExpirySeconds))
         {
 
+            // Re-checked here, not just when the link was created: the account
+            // could have been suspended, locked or flagged for a password
+            // reset in the meantime.
+            if (!$this->canSignInWithLink($user))
+            {
+
+                Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_not_allowed'));
+
+                return;
+
+            }
+
             if (Craft::$app->getUser()->login($user))
             {
 
-                return true;
+                return $query->cpLogin ? 'cp' : true;
 
             }
 

@@ -15,7 +15,7 @@ Porter is a Craft CMS plugin that is the missing toolbox for all things users.
     - Front-end form for users to deactivate their own account
 - [Inactive Account Cleanup](#inactive-account-cleanup)
     - Warn users by email after a configurable period of inactivity
-    - Auto-deactivate accounts that don't return after a longer threshold
+    - Delete accounts that don't return after a longer threshold
     - Admins and users with control panel access are always skipped
 - [Magic Link](#magic-link)
     - Sign in via a link emailed to the user's inbox
@@ -147,23 +147,23 @@ Sign in via a link emailed to the user's inbox. Enable under `Settings > Porter 
 
 For full markup control, copy `bymayo/porter/src/templates/components/magicLinkForm.twig`. Defaults are available via `craft.porter.magicLinkFormProperties()`.
 
-> ⚠️ Admins cannot use magic links.
+Switch on `Control Panel Access` and a `Sign in with a magic link` button appears on the control panel login screen, alongside the passkey option.
+
+> ⚠️ Admins cannot use magic links. Nor can accounts that are suspended, locked, pending verification, flagged for a password reset, or using two-step verification, since a link can't present a second factor.
 
 ### Inactive Account Cleanup
 
-Warn users who haven't signed in for a while, then deactivate them if they don't return. Enable under `Settings > Porter > Account` and set the reminder and deactivate thresholds.
-
-Cleanup runs via a console command, so schedule it with cron:
+Warn users who haven't signed in for a while, then delete them if they don't return. Enable under `Settings > Porter > Account`. Runs from cron:
 
 ```
 0 3 * * * cd /path/to/site && php craft porter/users/cleanup-inactive
 ```
 
-Each run sends warning emails to users that have crossed the reminder threshold (once per inactive period — signing back in resets it) and deactivates accounts past the deactivate threshold. Deactivated users get the `Account Deactivated` notification if it's enabled.
+Each run emails users past the reminder threshold (once per inactive period, and signing back in resets it), then deletes accounts past the delete threshold. Deleted users get the `Account Deleted` notification if it's enabled.
 
-> ⚠️ Admins and any user with control panel access are always skipped.
+Accounts are soft deleted, so they land in Craft's trash and can be restored from `Users` with the status filter set to `Trashed`. Craft purges them once they're older than [`softDeleteDuration`](https://craftcms.com/docs/5.x/reference/config/general.html#softdeleteduration), 30 days by default.
 
-> ⚠️ Users with no `lastLoginDate` aren't touched. Reactivating a previously deactivated user clears their `lastLoginDate` automatically, so they get a fresh inactivity clock from their next sign in.
+> ⚠️ Admins and anyone with control panel access are always skipped, as are users with no `lastLoginDate`.
 
 ### Block Burner / Disposable Emails
 
@@ -179,6 +179,7 @@ Each feature has its own switch and works on its own, so you can run breach chec
 
 | Setting | Default | Description |
 |---|---|---|
+| `passwordConfirm` | `false` | Require a matching confirmation field |
 | `passwordForcePolicy` | `false` | Enforce the length and character rules below |
 | `passwordForcePolicyMin` | `8` | Minimum length. Craft won't go below 6 |
 | `passwordForcePolicyMax` | `0` | Maximum length. `0` for no limit; Craft caps at 160 |
@@ -200,6 +201,16 @@ Each feature has its own switch and works on its own, so you can run breach chec
 | `passwordExpiryFrontEndRedirect` | `null` | Where front end users with an expired password are sent. Blank to handle it yourself |
 | `passwordExemptAdmins` | `false` | Exempt admins from everything on this page |
 | `passwordExemptGroups` | `null` | User group UIDs to exempt from everything on this page |
+
+#### Confirm Password
+
+Makes users type their new password twice, so a typo can't be saved unnoticed. Craft's own set password screen and the control panel get the second field automatically. On your own forms, add:
+
+```twig
+<input type="password" name="confirmPassword">
+```
+
+Only enforced on posted forms, so console commands and queue jobs are unaffected.
 
 #### Have I Been Pwned
 
@@ -274,7 +285,7 @@ Send transactional emails on key user events. Toggle each one under `Settings > 
 | Account Deactivated | A user's account is deactivated. |
 | Account Deleted | A user's account is deleted. |
 | Failed Login Attempts | Consecutive failed sign in attempts cross the configured threshold. |
-| Inactive Account Reminder | A user hasn't signed in for a while, before their account is deactivated. |
+| Inactive Account Reminder | A user hasn’t signed in for a while, before their account is deleted. |
 | Password Expiring Soon | A user's password is about to expire. |
 | Password Expired | A user's password has expired and a reset is required. |
 

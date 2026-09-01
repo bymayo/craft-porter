@@ -56,6 +56,7 @@ class Install extends Migration
                     'id' => $this->primaryKey(),
                     'userId' => $this->integer()->notNull(),
                     'token' => $this->string()->notNull(),
+                    'cpLogin' => $this->boolean()->defaultValue(false)->notNull(),
                     'dateCreated' => $this->dateTime()->notNull(),
                     'dateUpdated' => $this->dateTime()->notNull(),
                     'uid' => $this->uid()

@@ -1,5 +1,19 @@
 # Porter Changelog
 
+## 5.3.1 - 2026-08-28
+
+> [!WARNING]
+> Inactive Account Cleanup now deletes accounts instead of deactivating them, and `inactiveAccountDeactivateDays` is now `inactiveAccountDeleteDays`. Check your threshold after upgrading.
+
+### Added
+- Confirm password field, so a typo can't be saved unnoticed. Added automatically to Craft's set password screen and the control panel; add a `confirmPassword` field to your own forms
+- `Sign in with a magic link` on the control panel login screen, with its own sign in page
+
+### Changed
+- Magic links now run the same checks as a normal sign in. Suspended, locked, pending and password-reset-required accounts are refused, as are accounts using two-step verification, which a link can't satisfy
+- Inactive Account Cleanup deletes accounts rather than deactivating them. They go to the trash and can be restored for 30 days
+- The reminder email says the account will be deleted, and `Account Deleted` fires instead of `Account Deactivated`
+
 ## 5.3.0 - 2026-08-28
 
 ### Added

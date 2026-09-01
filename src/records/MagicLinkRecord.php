@@ -8,6 +8,12 @@ use Craft;
 use craft\db\ActiveRecord;
 
 
+/**
+ * @property int $id
+ * @property int $userId
+ * @property string $token
+ * @property bool $cpLogin
+ */
 class MagicLinkRecord extends ActiveRecord
 {
     public static function tableName()

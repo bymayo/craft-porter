@@ -23,7 +23,7 @@ class InactiveAccounts extends Component
    public function cleanupInactive(): array
    {
 
-      $stats = ['warned' => 0, 'deactivated' => 0];
+      $stats = ['warned' => 0, 'deleted' => 0];
 
       if (!$this->settings->inactiveAccountCleanup)
       {
@@ -31,11 +31,11 @@ class InactiveAccounts extends Component
       }
 
       $reminderDays = max(1, (int) $this->settings->inactiveAccountReminderDays);
-      $deactivateDays = max($reminderDays + 1, (int) $this->settings->inactiveAccountDeactivateDays);
+      $deleteDays = max($reminderDays + 1, (int) $this->settings->inactiveAccountDeleteDays);
 
       $now = new \DateTime();
       $reminderCutoff = (clone $now)->modify("-{$reminderDays} days");
-      $deactivateCutoff = (clone $now)->modify("-{$deactivateDays} days");
+      $deleteCutoff = (clone $now)->modify("-{$deleteDays} days");
 
       $candidates = User::find()
          ->status(User::STATUS_ACTIVE)
@@ -51,11 +51,18 @@ class InactiveAccounts extends Component
             continue;
          }
 
-         if ($user->lastLoginDate < $deactivateCutoff)
+         if ($user->lastLoginDate < $deleteCutoff)
          {
-            Craft::$app->getUsers()->deactivateUser($user);
-            $stats['deactivated']++;
+
+            // Soft delete, so the account lands in the trash and can be
+            // restored until Craft's garbage collection purges it.
+            if (Craft::$app->getElements()->deleteElement($user))
+            {
+               $stats['deleted']++;
+            }
+
             continue;
+
          }
 
          $record = UserLoginRecord::findOne(['userId' => $user->id]);
@@ -69,7 +76,7 @@ class InactiveAccounts extends Component
             }
          }
 
-         Porter::getInstance()->emailNotifications->sendInactiveAccountReminder($user, $deactivateDays);
+         Porter::getInstance()->emailNotifications->sendInactiveAccountReminder($user, $deleteDays);
 
          if (!$record)
          {

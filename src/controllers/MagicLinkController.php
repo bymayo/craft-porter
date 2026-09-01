@@ -11,7 +11,30 @@ use craft\helpers\UrlHelper;
 class MagicLinkController extends Controller
 {
 
-   protected array|int|bool $allowAnonymous = array('request', 'access');
+   protected array|int|bool $allowAnonymous = array('request', 'access', 'login');
+
+   /**
+    * The control panel's magic link sign in screen.
+    */
+   public function actionLogin()
+   {
+
+      $this->requireCpRequest();
+
+      $settings = Porter::getInstance()->helper->settings();
+
+      if (!$settings->magicLink || !$settings->magicLinkControlPanel)
+      {
+         throw new \yii\web\NotFoundHttpException();
+      }
+
+      Craft::$app->getView()->registerAssetBundle(
+         \bymayo\porter\assetbundles\porter\PorterMagicLinkAsset::class
+      );
+
+      return $this->renderTemplate('porter/cp/magicLink', [], \craft\web\View::TEMPLATE_MODE_CP);
+
+   }
 
    public function actionRequest()
    {
@@ -41,7 +64,14 @@ class MagicLinkController extends Controller
 
       $token = $request->getParam('authToken');
 
-      if (Porter::getInstance()->magicLink->validateToken($token))
+      $result = Porter::getInstance()->magicLink->validateToken($token);
+
+      if ($result === 'cp')
+      {
+          return $this->redirect(UrlHelper::cpUrl(Craft::$app->getConfig()->getGeneral()->getPostCpLoginRedirect()));
+      }
+
+      if ($result)
       {
           return $this->redirect(UrlHelper::siteUrl(Craft::$app->getConfig()->getGeneral()->getPostLoginRedirect()));
       }

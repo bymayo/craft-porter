@@ -1,0 +1,30 @@
+/**
+ * Porter — magic link on the control panel login screen.
+ */
+
+.porter-magic-link {
+    margin-top: 10px;
+}
+
+.porter-magic-link__btn {
+    text-align: center;
+}
+
+.porter-magic-link__message {
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--custom-text-color, var(--fg-subtle, #7d8996));
+}
+
+/* Craft's own "Back to sign in" is a <button> that ends up at 11px. This
+   is an <a>, so the size is matched explicitly. */
+.login-alt-container .porter-magic-link__back.btn,
+.login-alt-container .porter-magic-link__back.btn .label {
+    font-size: 11px;
+}
+
+.login-alt-container .porter-magic-link__back.btn {
+    display: inline-flex;
+    width: auto;
+    padding: 0;
+}

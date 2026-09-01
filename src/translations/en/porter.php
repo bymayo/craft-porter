@@ -12,6 +12,7 @@ return [
     'porter_magic_link_token_expired' => 'Magic link token has expired.',
     'porter_magic_link_sent' => 'A magic link has been sent, if the email address exists as a user.',
     'porter_magic_link_failed' => 'A magic link could not be sent.',
+    'porter_magic_link_not_allowed' => 'This account can\'t be signed in with a magic link.',
     'porter_magic_link_email_heading' => 'When a user requests a magic link to login.',
     'porter_magic_link_email_subject' => 'Your magic link request.',
     'porter_magic_link_email_body' => 'Hey {{ user.friendlyName }},
@@ -117,11 +118,11 @@ return [
     If this was you, no further action is needed.
 
     If you didn’t make these attempts, your account may be the target of a sign in attack. We recommend changing your password and contacting us if you’re unable to sign in yourself.',
-    'porter_inactive_account_reminder_email_heading' => 'When a user hasn’t signed in for a while and is approaching automatic deactivation.',
-    'porter_inactive_account_reminder_email_subject' => 'Your account is inactive',
+    'porter_inactive_account_reminder_email_heading' => 'When a user hasn’t signed in for a while and their account is about to be deleted.',
+    'porter_inactive_account_reminder_email_subject' => 'Sign in to keep your account',
     'porter_inactive_account_reminder_email_body' => 'Hey {{ user.friendlyName }},
 
-    We noticed you haven’t signed in for a while. To keep your account, sign in within the next {{ deactivateDays }} days, otherwise it will be deactivated automatically.
+    We noticed you haven’t signed in for a while. To keep your account, sign in within the next {{ deleteDays }} days. If you don’t, it will be deleted automatically.
 
     {% if user.lastLoginDate %}Last sign in: {{ user.lastLoginDate|date(\'F j, Y\') }}{% endif %}
 
