@@ -48,7 +48,6 @@ return [
 
     // Email
     'emailBurners' => false,
-    'emailsBurnersVerifierApiKey' => null,
 
     // Password - Confirmation
     'passwordConfirm' => false,

@@ -1,5 +1,29 @@
 # Porter Changelog
 
+## 5.3.4 - 2026-09-01
+
+> [!WARNING]
+> Burner email blocking no longer uses the Verifier API, and `emailsBurnersVerifierApiKey` has been removed. The check now runs against a domain list on your own server instead of a third-party service.
+
+> [!WARNING]
+> Porter's two utilities are now one, so `utility:porter-password-retention` and `utility:porter-disposable-domains` are replaced by `utility:porter`. Re-grant it to any non-admin group that had access. Admins are unaffected.
+
+### Added
+- Burner email blocking works without an API key or an account. A list of 75,000+ disposable domains is downloaded when you switch the feature on, alongside syntax and MX checks ([#13](https://github.com/bymayo/craft-porter/issues/13))
+- `porter/burner-emails/update` refreshes the list from [disposable/disposable-email-domains](https://github.com/disposable/disposable-email-domains), which is regenerated daily
+- A button in the `Porter` utility to update the list without the command line
+
+### Changed
+- Checking an address no longer leaves the server. The domain list is a file in `storage/porter/`, read from disk
+- `Password Retention` and the disposable domain list are now sections of a single `Porter` utility, rather than a utility each
+
+### Removed
+- The Verifier API and its `emailsBurnersVerifierApiKey` setting. The service was unreliable, sign up was reportedly impossible, and no equivalent is free and sustainable
+
+### Fixed
+- Burner email checking failed closed. If the Verifier API was unreachable or the key was rejected, every address was refused and the site quietly stopped accepting registrations
+- Burner email checking ran on every user save, so editing any user in the control panel sent their address to a third party. It only runs when the address is new or changed
+
 ## 5.3.3 - 2026-09-01
 
 ### Security

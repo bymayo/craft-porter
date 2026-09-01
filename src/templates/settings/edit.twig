@@ -278,7 +278,7 @@
         <h2>Block Burner / Disposable Emails</h2>
 
         {{ forms.lightswitchField({
-            label: 'Block disposable, non-existent domain or invalid emails',
+            label: 'Block disposable and undeliverable emails',
             id: 'emailBurners',
             name: 'settings[emailBurners]',
             on: settings['emailBurners'],
@@ -287,13 +287,58 @@
 
         <div id="emailBurners-options">
 
-            {{ forms.textField({
-                label: 'Verifier API Key',
-                instructions: 'Get your free API key from https://verifier.meetchopra.com.',
-                id: 'emailsBurnersVerifierApiKey',
-                name: 'settings[emailsBurnersVerifierApiKey]',
-                value: settings['emailsBurnersVerifierApiKey']
-            }) }}
+            {% set burnerList = craft.porter.burnerEmailList() %}
+
+            {% set burnerTable %}
+                {% css %}
+                    .porter-info-table {
+                        border: 1px solid var(--hairline-color);
+                        border-radius: var(--large-border-radius);
+                        overflow: hidden;
+                    }
+                    .porter-info-table table { margin: 0; }
+                    .porter-info-table th,
+                    .porter-info-table td {
+                        border-bottom: 1px solid var(--hairline-color);
+                    }
+                    .porter-info-table th {
+                        border-right: 1px solid var(--hairline-color);
+                        width: 40%;
+                    }
+                    .porter-info-table tr:last-child th,
+                    .porter-info-table tr:last-child td {
+                        border-bottom: 0;
+                    }
+                {% endcss %}
+                <div class="porter-info-table" style="max-width: 380px;">
+                <table class="data fullwidth">
+                    <tbody>
+                        <tr>
+                            <th scope="row">{{ 'Domains'|t('porter') }}</th>
+                            <td>{{ burnerList.count|number_format }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">{{ 'Last updated'|t('porter') }}</th>
+                            <td>
+                                {% if burnerList.updated %}
+                                    {{ burnerList.updated|date('j M Y') }}
+                                {% else %}
+                                    <span class="light">{{ 'Unknown'|t('porter') }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+                <p style="margin-top: 10px;">
+                    <a class="go" href="{{ cpUrl('utilities/porter') }}">{{ 'Update the list'|t('porter') }}</a>
+                </p>
+            {% endset %}
+
+            {{ forms.field({
+                label: 'Disposable Domains',
+                instructions: 'Rebuilt daily, so update it regularly to stay effective. See the [documentation](https://github.com/bymayo/craft-porter/blob/craft-5/README.md#block-burner--disposable-emails).'
+            }, burnerTable) }}
 
         </div>
 

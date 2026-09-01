@@ -9,6 +9,14 @@ use Craft;
 class PorterVariable
 {
 
+   /**
+    * Where the disposable domain list came from, its size and its age.
+    */
+   public function burnerEmailList()
+   {
+      return Porter::getInstance()->burnerEmails->listInfo();
+   }
+
    public function settings()
    {
       return Porter::getInstance()->helper->settings();

@@ -113,7 +113,6 @@ class Settings extends Model
 
     public $emailBurners = 0;
 
-    public $emailsBurnersVerifierApiKey = null;
 
     // Password
 
@@ -282,7 +281,6 @@ class Settings extends Model
                     'deactivateAccountRedirect',
                     'magicLinkRedirect',
                     'magicLinkRegisterRedirect',
-                    'emailsBurnersVerifierApiKey',
                     'passwordPwnedFailMode',
                     'passwordExpiryPeriod',
                     'passwordBlocklistWords',

@@ -13,6 +13,7 @@ namespace bymayo\porter;
 use bymayo\porter\services\Helper;
 use bymayo\porter\services\MagicLink;
 use bymayo\porter\services\EmailPassword;
+use bymayo\porter\services\BurnerEmails;
 use bymayo\porter\services\DeactivateAccount;
 use bymayo\porter\services\DeleteAccount;
 use bymayo\porter\services\EmailNotifications;
@@ -22,7 +23,7 @@ use bymayo\porter\services\PasswordRetention;
 use bymayo\porter\services\Security;
 use bymayo\porter\assetbundles\porter\PorterMagicLinkAsset;
 use bymayo\porter\rules\UserRules;
-use bymayo\porter\utilities\PasswordRetentionUtility;
+use bymayo\porter\utilities\PorterUtility;
 use bymayo\porter\variables\PorterVariable;
 use bymayo\porter\models\Settings;
 
@@ -114,6 +115,32 @@ class Porter extends Plugin
         Craft::warning($message, 'porter');
     }
 
+    /**
+     * Fetches the disposable domain list the first time burner blocking is
+     * switched on.
+     *
+     * The list isn't bundled, so without this the feature would look enabled
+     * while quietly blocking nothing until somebody ran the console command.
+     */
+    public function afterSaveSettings(): void
+    {
+
+        parent::afterSaveSettings();
+
+        $settings = $this->getSettings();
+
+        if ($settings && $settings->emailBurners && !$this->burnerEmails->hasList())
+        {
+
+            if ($this->burnerEmails->updateList() === null)
+            {
+                Craft::$app->getSession()->setError(Craft::t('porter', 'Couldn’t download the disposable domain list. Run `porter/burner-emails/update` to try again.'));
+            }
+
+        }
+
+    }
+
     public function init()
     {
         parent::init();
@@ -162,6 +189,7 @@ class Porter extends Plugin
             'deleteAccount' => DeleteAccount::class,
             'deactivateAccount' => DeactivateAccount::class,
             'emailPassword' => EmailPassword::class,
+            'burnerEmails' => BurnerEmails::class,
             'emailNotifications' => EmailNotifications::class,
             'inactiveAccounts' => InactiveAccounts::class,
             'passwordPolicy' => PasswordPolicy::class,
@@ -385,10 +413,13 @@ class Porter extends Plugin
 
                 $user = $event->sender;
 
-                if ($this->settings->emailBurners && $this->settings->emailsBurnersVerifierApiKey)
+                // Only when the address is actually new or changed. It used
+                // to run on every save, so editing any user in the control
+                // panel sent their address off for a DNS or API lookup.
+                if ($this->settings->emailBurners && $this->burnerEmails->shouldCheck($user))
                 {
 
-                    $errors = $this->emailPassword->checkBurnerEmail($user->email);
+                    $errors = $this->burnerEmails->check($user->email);
 
                     foreach ($errors as $error) {
                         $user->addError('email', $error);
@@ -441,11 +472,9 @@ class Porter extends Plugin
             Utilities::EVENT_REGISTER_UTILITIES,
             function (RegisterComponentTypesEvent $event) {
 
-                if (!Porter::getInstance()->passwordRetention->isEnabled()) {
-                    return;
+                if (PorterUtility::isAvailable()) {
+                    $event->types[] = PorterUtility::class;
                 }
-
-                $event->types[] = PasswordRetentionUtility::class;
 
             }
         );

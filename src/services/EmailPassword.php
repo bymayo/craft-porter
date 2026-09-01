@@ -78,59 +78,16 @@ class EmailPassword extends Component
       }
    }
 
+   /**
+    * Kept for backwards compatibility.
+    *
+    * Burner checking now runs through the BurnerEmails service, against a
+    * bundled domain list rather than a third-party API.
+    */
    public function checkBurnerEmail($email)
    {
-
-      $errors = [];
-
-      if (!$this->verfierApi($email))
-      {
-         $errors[] = Craft::t('porter', 'Email addresses considered Disposable, Invalid or have a non-existent domain are not allowed.');
-      }
-
-      return $errors;
-
+      return Porter::getInstance()->burnerEmails->check($email);
    }
 
-   /**
-   * https://github.com/email-verifier/verifier-php
-   */
-   public function verfierApi($email = null, $details = false)
-   {
-
-      $settings = Porter::getInstance()->helper->settings();
-
-      $ch = curl_init();
-
-      curl_setopt($ch, CURLOPT_URL, 'https://verifier.meetchopra.com/verify/'. $email .'?token='. $settings->emailsBurnersVerifierApiKey);
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-      curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-      curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
-
-      $result = curl_exec($ch);
-
-      if (curl_errno($ch)) {
-         Craft::error('Porter email verifier error: ' . curl_error($ch), __METHOD__);
-         curl_close($ch);
-         return false;
-      }
-
-      curl_close($ch);
-
-      $data = json_decode($result, true);
-
-      if (!is_array($data)) {
-         Craft::error('Porter email verifier returned invalid response', __METHOD__);
-         return false;
-      }
-
-      if ($details) {
-         return $data;
-      }
-
-      return $data['status'] ?? false;
-
-   }
 
 }

@@ -22,8 +22,9 @@ Porter is a Craft CMS plugin that is the missing toolbox for all things users.
     - Front end and/or control panel login, with configurable expiry
     - Optional passwordless sign up, creating the account on first request
 - [Block Burner / Disposable Emails](#block-burner--disposable-emails)
-    - 22,000+ disposable email domains blocked
-    - Domain validity, syntax and MX record checks
+    - 75,000+ disposable email domains blocked, with no API key or account needed
+    - The list is downloaded once and read from disk, so checking an address never leaves your server
+    - Syntax and MX record checks, and a command to keep the list current
 - [Password Policy](#password-policy)
     - Configurable min/max length, plus lower case, upper case, numeric and symbol requirements
     - Have I Been Pwned breach checking, using k-Anonymity
@@ -202,7 +203,27 @@ Accounts are soft deleted, so they land in Craft's trash and can be restored fro
 
 ### Block Burner / Disposable Emails
 
-Block disposable and invalid emails at sign up. Enable under `Settings > Porter > Email` and add a free API key from <https://verifier.meetchopra.com/>.
+Block disposable and undeliverable emails at sign up. Enable under `Settings > Porter > Email`. One switch, no API key, no account.
+
+Three checks run:
+
+| Check | What it catches |
+|---|---|
+| Syntax | Malformed addresses |
+| Domain list | 75,000+ known disposable domains |
+| MX lookup | Domains that can't receive mail |
+
+The domain list lives at `storage/porter/disposable-domains.txt`. It's downloaded once, when you switch the feature on, and read from disk after that, so checking an address never leaves your server and there's nothing to install.
+
+It comes from [disposable/disposable-email-domains](https://github.com/disposable/disposable-email-domains) (MIT), which is regenerated daily. Update it whenever you like from `Utilities > Disposable Domains`, or keep it current from cron:
+
+```
+0 4 * * * cd /path/to/site && php craft porter/burner-emails/update
+```
+
+A download that fails, or returns a suspiciously short list, is discarded rather than replacing a good one.
+
+To un-block a domain the list gets wrong, remove the line from `storage/porter/disposable-domains.txt`, or open an issue [upstream](https://github.com/disposable/disposable/issues).
 
 ### Password Policy
 
@@ -348,6 +369,10 @@ Tweak the copy (logo, colours, footer) to match your brand — Porter won't over
 > 'trustedHosts' => ['any'], // or restrict to your proxy's CIDR ranges
 > 'secureHeaders' => ['X-Forwarded-For', 'X-Forwarded-Host', 'X-Forwarded-Proto'],
 > ```
+
+## Credits
+
+The disposable domain list comes from [disposable/disposable-email-domains](https://github.com/disposable/disposable-email-domains), used under the MIT licence.
 
 ## Support
 

@@ -1,0 +1,139 @@
+{% import '_includes/forms' as forms %}
+
+{% css %}
+    .porter-info-table {
+        border: 1px solid var(--hairline-color);
+        border-radius: var(--large-border-radius);
+        overflow: hidden;
+        max-width: 680px;
+    }
+    .porter-info-table table { margin: 0; }
+    .porter-info-table th,
+    .porter-info-table td {
+        border-bottom: 1px solid var(--hairline-color);
+    }
+    .porter-info-table th {
+        border-right: 1px solid var(--hairline-color);
+        width: 40%;
+    }
+    .porter-info-table tr:last-child th,
+    .porter-info-table tr:last-child td {
+        border-bottom: 0;
+    }
+    .porter-section > h2 { margin-bottom: 16px; }
+{% endcss %}
+
+{% if burnersEnabled %}
+
+    <div class="porter-section">
+
+        <h2>{{ 'Disposable Domains'|t('porter') }}</h2>
+
+        <p class="light" style="margin-top: -8px;">
+            {{ 'The list of disposable email domains used to block sign ups.'|t('porter') }}
+        </p>
+
+        <div class="porter-info-table">
+            <table class="data fullwidth">
+                <tbody>
+                    <tr>
+                        <th scope="row">{{ 'Domains'|t('porter') }}</th>
+                        <td>{{ list.count|number_format }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ 'Last updated'|t('porter') }}</th>
+                        <td>
+                            {% if list.updated %}
+                                {{ list.updated|date('j M Y, H:i') }}
+                            {% else %}
+                                <span class="light">{{ 'Unknown'|t('porter') }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ 'Source'|t('porter') }}</th>
+                        <td><a href="{{ source }}" rel="noopener" target="_blank">{{ source }}</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <form method="post" accept-charset="UTF-8" style="margin-top: 20px;">
+            {{ csrfInput() }}
+            {{ actionInput('porter/burner-emails/update') }}
+            {{ redirectInput('utilities/porter') }}
+
+            <p class="light">
+                {% if downloaded %}
+                    {{ 'The list is regenerated daily. Downloading again replaces your copy with the current one.'|t('porter') }}
+                {% else %}
+                    {{ 'No copy has been downloaded yet, so the snapshot that ships with Porter is being used. Download the current list to bring it up to date.'|t('porter') }}
+                {% endif %}
+            </p>
+
+            <button type="submit" class="btn submit">
+                {{ downloaded ? 'Update List'|t('porter') : 'Download List'|t('porter') }}
+            </button>
+        </form>
+
+    </div>
+
+{% endif %}
+
+{% if retentionEnabled %}
+
+    {% if burnersEnabled %}<hr>{% endif %}
+
+    <div class="porter-section">
+
+        <h2>{{ 'Password Retention'|t('porter') }}</h2>
+
+        <p class="light" style="margin-top: -8px;">
+            {{ 'Passwords due a reset.'|t('porter') }}
+            {%- if exemptAdmins and exemptGroups %}
+                {{ 'Admins and exempt groups aren’t counted.'|t('porter') }}
+            {%- elseif exemptAdmins %}
+                {{ 'Admins aren’t counted.'|t('porter') }}
+            {%- elseif exemptGroups %}
+                {{ 'Exempt groups aren’t counted.'|t('porter') }}
+            {%- endif %}
+        </p>
+
+        <div class="porter-info-table">
+            <table class="data fullwidth">
+                <tbody>
+                    <tr>
+                        <th scope="row">{{ 'Passwords past their expiry'|t('porter') }}</th>
+                        <td>{{ expired|number_format }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ 'Expiring within the warning window'|t('porter') }}</th>
+                        <td>{{ expiringSoon|number_format }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        {% set canReset = canForceReset and expired %}
+
+        <form method="post" accept-charset="UTF-8" style="margin-top: 20px;">
+            {{ csrfInput() }}
+            {{ actionInput('porter/retention/force-reset-passwords') }}
+            {{ redirectInput('utilities/porter') }}
+
+            {% if not canForceReset %}
+                <p class="light">{{ 'You don’t have permission to force reset passwords.'|t('porter') }}</p>
+            {% elseif expired %}
+                <p class="light">{{ 'Flags every user above as needing a password reset, and emails them if the notification is enabled.'|t('porter') }}</p>
+            {% endif %}
+
+            <button type="submit"
+                class="btn submit{{ not canReset ? ' disabled' }}"
+                {{ not canReset ? 'disabled' }}>
+                {{ 'Force Reset Passwords'|t('porter') }}
+            </button>
+        </form>
+
+    </div>
+
+{% endif %}
