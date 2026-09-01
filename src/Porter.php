@@ -89,7 +89,7 @@ class Porter extends Plugin
     /**
      * @var string
      */
-    public string $schemaVersion = '1.6.0';
+    public string $schemaVersion = '1.7.0';
 
     /**
      * @var bool
