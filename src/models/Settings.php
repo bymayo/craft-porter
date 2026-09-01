@@ -91,6 +91,24 @@ class Settings extends Model
 
     public $magicLinkRegisterRedirect = '/';
 
+    /**
+     * Links one address may request within the window, before further
+     * requests are silently dropped. 0 disables the cap. Config file only.
+     */
+    public $magicLinkThrottleLimit = 5;
+
+    /**
+     * The throttle window, in seconds. Config file only.
+     */
+    public $magicLinkThrottleWindow = 900;
+
+    /**
+     * Floor for how long a magic link request takes to answer, in
+     * milliseconds, so a request that sends no email can't be told apart from
+     * one that does. 0 disables it. Config file only.
+     */
+    public $magicLinkMinResponseMs = 500;
+
     // Email
 
     public $emailBurners = 0;
@@ -216,9 +234,17 @@ class Settings extends Model
                     'passwordHistoryCount',
                     'passwordStrengthMinScore',
                     'passwordExpiryAmount',
-                    'passwordExpiryWarningDays'
+                    'passwordExpiryWarningDays',
+                    'magicLinkThrottleLimit',
+                    'magicLinkThrottleWindow',
+                    'magicLinkMinResponseMs'
                 ],
                 'integer'
+            ],
+            [
+                ['magicLinkThrottleLimit', 'magicLinkThrottleWindow', 'magicLinkMinResponseMs'],
+                'integer',
+                'min' => 0
             ],
             [
                 ['passwordPwnedFailMode'],

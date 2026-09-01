@@ -73,63 +73,175 @@ class MagicLink extends Component
    public function request($request)
    {
 
-        if ($this->settings->magicLink) 
+        if (!$this->settings->magicLink)
+        {
+            return;
+        }
+
+        $start = microtime(true);
+
+        $email = $request->getBodyParam('email');
+
+        // Every outcome below answers the same way, so the response can't be
+        // used to work out which addresses have accounts. Only input that
+        // isn't an email address at all is treated as an error.
+        if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL))
+        {
+            return $this->_requestFailed($request);
+        }
+
+        if (!$this->withinThrottle($email))
+        {
+            // Deliberately the success response: saying "too many requests"
+            // would confirm the address is worth hammering.
+            return $this->_requestSent($request, $start);
+        }
+
+        $user = Craft::$app->getUsers()->getUserByUsernameOrEmail($email);
+
+        $isNew = false;
+
+        // Passwordless sign up: no account yet, so make one and send them
+        // a link. The link is what proves they own the address.
+        if (!$user && $this->registrationEnabled())
         {
 
-            $email = $request->getBodyParam('email');
+           $user = $this->registerUser($email, $request);
 
-            $user = $email ? Craft::$app->getUsers()->getUserByUsernameOrEmail($email) : null;
-
-            $isNew = false;
-
-            // Passwordless sign up: no account yet, so make one and send them
-            // a link. The link is what proves they own the address.
-            if (!$user && $email && $this->registrationEnabled())
-            {
-
-               $user = $this->registerUser($email, $request);
-
-               $isNew = $user !== null;
-
-            }
-
-            $token = $user ? $this->createToken($user, $isNew, $this->postedNewUserRedirect($request)) : false;
-
-            if ($token)
-            {
-
-                Porter::getInstance()->helper->notify(
-                    'porter_magic_link_email',
-                    $user->email,
-                    array(
-                        'user' => $user,
-                        'link' => $this->createTokenLink($token)
-                    )
-                );
-
-                if ($request->getAcceptsJson())
-                {
-                   return [
-                      'success' => true,
-                      'message' => Craft::t('porter', 'porter_magic_link_sent')
-                   ];
-                }
- 
-                Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_sent'));
-                return true;
-            }
-
-            if ($request->getAcceptsJson())
-            {
-                return [
-                    'success' => false,
-                    'message' => Craft::t('porter', 'porter_magic_link_failed')
-                ];
-            }
-
-            Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_failed'));
+           $isNew = $user !== null;
 
         }
+
+        $token = $user ? $this->createToken($user, $isNew, $this->postedNewUserRedirect($request)) : false;
+
+        if ($token)
+        {
+
+            Porter::getInstance()->helper->notify(
+                'porter_magic_link_email',
+                $user->email,
+                array(
+                    'user' => $user,
+                    'link' => $this->createTokenLink($token)
+                )
+            );
+
+        }
+
+
+        // Sent or not, the caller is told the same thing. No account, a
+        // suspended one, or one using two step verification all land here.
+        return $this->_requestSent($request, $start);
+
+   }
+
+   private function _requestSent($request, ?float $start = null)
+   {
+
+      if ($start !== null)
+      {
+         $this->padResponse($start);
+      }
+
+      if ($request->getAcceptsJson())
+      {
+         return [
+            'success' => true,
+            'message' => Craft::t('porter', 'porter_magic_link_sent')
+         ];
+      }
+
+      Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_sent'));
+
+      return true;
+
+   }
+
+   private function _requestFailed($request)
+   {
+
+      if ($request->getAcceptsJson())
+      {
+         return [
+            'success' => false,
+            'message' => Craft::t('porter', 'porter_magic_link_failed')
+         ];
+      }
+
+      Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_failed'));
+
+      return;
+
+   }
+
+   /**
+    * Holds the response back until a fixed floor has passed.
+    *
+    * Every outcome of a request answers the same way, but only some of them
+    * send an email, and that difference is measurable from the outside. Doing
+    * matching busy work instead would mean guessing what a mail send costs on
+    * this install, which is unknowable - a floor doesn't have to guess.
+    *
+    * It bounds the common case rather than closing the channel outright: a
+    * mail send slower than the floor still shows. Raise
+    * `magicLinkMinResponseMs` on an install with slow SMTP.
+    */
+   private function padResponse(float $start): void
+   {
+
+      $floor = (int) $this->settings->magicLinkMinResponseMs;
+
+      if ($floor <= 0)
+      {
+         return;
+      }
+
+      $remaining = ($floor / 1000) - (microtime(true) - $start);
+
+      if ($remaining > 0)
+      {
+         usleep((int) ($remaining * 1000000));
+      }
+
+   }
+
+   /**
+    * Whether another link may be sent to this address, and counts this one.
+    *
+    * Without a cap, the form is a way to mail bomb any address a third party
+    * cares to type in. Kept in the cache rather than a table: the counter is
+    * worthless once its window closes, so it should expire on its own.
+    */
+   public function withinThrottle(string $email): bool
+   {
+
+      $limit = (int) $this->settings->magicLinkThrottleLimit;
+      $window = (int) $this->settings->magicLinkThrottleWindow;
+
+      if ($limit <= 0 || $window <= 0)
+      {
+         return true;
+      }
+
+      $cache = Craft::$app->getCache();
+
+      // Hashed so the cache never holds a list of addresses that have asked
+      // for a link.
+      $key = 'porter.magicLink.throttle.' . hash('sha256', mb_strtolower(trim($email)));
+
+      $count = (int) $cache->get($key);
+
+      if ($count >= $limit)
+      {
+         return false;
+      }
+
+      // Yii has no way to bump a value without resetting its expiry, so the
+      // window slides: the counter clears once the address has been quiet for
+      // a full window, rather than a fixed period after the first request.
+      $cache->set($key, $count + 1, $window);
+
+      return true;
 
    }
 
@@ -172,6 +284,18 @@ class MagicLink extends Component
 
    }
 
+   /**
+    * The stored form of a magic link token.
+    *
+    * Tokens are 64 random characters, so there's nothing to brute force and
+    * no salt or work factor needed - this exists so the table holds something
+    * that can't be replayed, not to resist a dictionary attack.
+    */
+   private function hashToken(string $token): string
+   {
+      return hash('sha256', $token);
+   }
+
    public function invalidateTokens($user)
    {
 
@@ -205,9 +329,15 @@ class MagicLink extends Component
 
         $this->invalidateTokens($user);
 
+        $raw = Craft::$app->getSecurity()->generateRandomString(64);
+
         $record = new MagicLinkRecord();
         $record->userId = $user->id;
-        $record->token = Craft::$app->getSecurity()->generateRandomString(64);
+
+        // Only the digest is stored. The raw secret lives in the emailed link
+        // and nowhere else, so a dump of this table is not a set of usable
+        // sign in credentials.
+        $record->token = $this->hashToken($raw);
 
         // Remembered so the link lands them where they asked from, rather
         // than guessing from whether they happen to have control panel access.
@@ -230,7 +360,7 @@ class MagicLink extends Component
 
                 $transaction->commit();
 
-                return $record->token;
+                return $raw;
 
             }
 
@@ -364,9 +494,13 @@ class MagicLink extends Component
       // Mirrors the checks Craft runs in User::authenticate(). Not using
       // craft\helpers\User::getAuthStatus(), which only exists in later 5.x
       // releases and Porter supports ^5.0.
-      if ($user->getStatus() !== User::STATUS_ACTIVE)
+      //
+      // Pending is allowed through: the link is sent to the address on the
+      // account, so opening it proves the same thing Craft's own activation
+      // email proves. The account is activated as the link is used.
+      if (!in_array($user->getStatus(), [User::STATUS_ACTIVE, User::STATUS_PENDING], true))
       {
-         // Inactive, archived, pending verification, or suspended.
+         // Inactive, archived, or suspended.
          return false;
       }
 
@@ -401,14 +535,37 @@ class MagicLink extends Component
 
    }
 
+   /**
+    * Activates a pending account whose holder has just proved the address.
+    */
+   private function activate(User $user): bool
+   {
+
+      try
+      {
+         Craft::$app->getUsers()->activateUser($user);
+      }
+      catch (\Throwable $e)
+      {
+
+         Porter::warn('[Magic Link] Couldn’t activate ' . $user->email . ': ' . $e->getMessage());
+
+         return false;
+
+      }
+
+      return true;
+
+   }
+
    public function validateToken($token)
    {
 
-    $query = MagicLinkRecord::findOne(
+    $query = $token ? MagicLinkRecord::findOne(
         [
-            'token' => $token
+            'token' => $this->hashToken($token)
         ]
-    );
+    ) : null;
 
     if ($query)
     {
@@ -430,6 +587,19 @@ class MagicLink extends Component
             // could have been suspended, locked or flagged for a password
             // reset in the meantime.
             if (!$this->canSignInWithLink($user))
+            {
+
+                Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_not_allowed'));
+
+                return;
+
+            }
+
+            // Finish what Craft's activation email would have done. Only
+            // reached once canSignInWithLink() has cleared the account, so a
+            // suspended or locked user never gets here - which matters,
+            // because activateUser() would clear both of those flags.
+            if ($user->getStatus() === User::STATUS_PENDING && !$this->activate($user))
             {
 
                 Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_not_allowed'));

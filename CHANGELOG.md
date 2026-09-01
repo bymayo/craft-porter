@@ -6,6 +6,15 @@
 - Magic link registration, so an unrecognised email creates the account and signs the user in. No password is ever chosen ([#7](https://github.com/bymayo/craft-porter/issues/7))
 - `New User Redirect`, where brand new accounts land. Override it per form with `newUserRedirect`
 
+### Security
+- Magic link tokens are now stored as a SHA-256 digest. A copy of the database is no longer a set of usable sign in links. Links already sent keep working
+- Magic link requests are capped per email address, so the form can't be used to mail bomb someone. Set `magicLinkThrottleLimit` and `magicLinkThrottleWindow` in `config/porter.php`
+- Requesting a link now answers the same way whether or not the address has an account, so the form can no longer be used to find out who has one
+- Requests also take the same time to answer either way. Sending an email is slower than not sending one, and the difference was enough to tell the two apart. Tune with `magicLinkMinResponseMs` in `config/porter.php`
+
+### Changed
+- A magic link now activates a pending account. Someone who registered but never clicked Craft's activation email can finish through the link instead of being stuck
+
 ## 5.3.1 - 2026-08-28
 
 > [!WARNING]

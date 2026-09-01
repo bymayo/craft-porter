@@ -42,6 +42,9 @@ return [
     'magicLinkRegister' => false, // Create an account when the email doesn't match a user
     'magicLinkRegisterGroups' => null, // User group UIDs to assign new accounts to
     'magicLinkRegisterRedirect' => '/', // Where brand new users are sent, blank to use the above
+    'magicLinkThrottleLimit' => 5, // Links one address can request per window, 0 for no cap
+    'magicLinkThrottleWindow' => 900, // Throttle window in seconds
+    'magicLinkMinResponseMs' => 500, // Floor for how long a request takes to answer, 0 to disable
 
     // Email
     'emailBurners' => false,

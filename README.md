@@ -167,6 +167,17 @@ Override the destination per form:
 }) }}
 ```
 
+Requests are capped per email address, so nobody can use the form to mail bomb an inbox. The defaults allow 5 links per address every 15 minutes; change them in `config/porter.php`:
+
+```php
+'magicLinkThrottleLimit' => 5, // 0 for no cap
+'magicLinkThrottleWindow' => 900,
+```
+
+A request always reports the same thing, and takes the same time, whether or not the address has an account, so the form can't be used to find out who is registered. Raise `magicLinkMinResponseMs` if your mail server is slow enough to show through. Tokens are stored as a SHA-256 digest, so a copy of the database is not a set of usable sign in links.
+
+A pending account, one that registered but never clicked Craft's activation email, is activated by using a magic link. Suspended, inactive and locked accounts are still refused.
+
 > ⚠️ Admins cannot use magic links. Nor can accounts that are suspended, locked, pending verification, flagged for a password reset, or using two-step verification, since a link can't present a second factor.
 
 ### Inactive Account Cleanup
