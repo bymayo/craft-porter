@@ -155,7 +155,13 @@ Switch on `Control Panel Access` and a `Sign in with a magic link` button appear
 
 Switch on `Register New Users` and an unrecognised email creates the account rather than failing. The same form becomes sign up and sign in, and no password is ever chosen.
 
-The link is what proves the address belongs to them, so the account is created active rather than pending. It gets a random password the user never sees or needs. New users are added to the groups picked under `Add New Users To`, and land on `New User Redirect` instead of the usual one, so you can send them to a welcome or profile page.
+The account is created pending and the link activates it, so a sign up nobody confirms never leaves a live account behind. It gets a random password the user never sees or needs. New users are added to the groups picked under `Add New Users To`, and land on `New User Redirect` instead of the usual one, so you can send them to a welcome or profile page.
+
+Unconfirmed sign ups stay pending until Craft's garbage collection clears them, which is off by default. Switch it on in `config/general.php`:
+
+```php
+'purgePendingUsersDuration' => 1209600, // 14 days
+```
 
 Craft's own public registration must be switched on under `Settings > Users`. Porter won't create accounts on a site that has deliberately turned it off.
 

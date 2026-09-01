@@ -396,8 +396,11 @@ class MagicLink extends Component
    /**
     * Creates an account for a passwordless sign up.
     *
-    * Active rather than pending, because the emailed link is what verifies
-    * the address, and canSignInWithLink() refuses pending accounts.
+    * Pending rather than active. The emailed link is what verifies the
+    * address, and validateToken() activates the account as the link is used,
+    * so an account that's never confirmed stays pending and Craft's own
+    * garbage collection can clear it away. Nothing sweeps it unless
+    * `purgePendingUsersDuration` is set, since that defaults to off.
     */
    public function registerUser(string $email, $request = null): ?User
    {
@@ -405,7 +408,7 @@ class MagicLink extends Component
       $user = new User();
       $user->email = $email;
       $user->username = $email;
-      $user->active = true;
+      $user->pending = true;
       $user->newPassword = $this->generatePassword();
 
       if ($request)
@@ -423,6 +426,19 @@ class MagicLink extends Component
 
          return null;
 
+      }
+
+      // Craft only sweeps pending users whose verification code has gone
+      // stale, and a row with no code at all is never swept - `NULL < date`
+      // is null in SQL, so it can't match. The code is never sent anywhere;
+      // it exists so the row has an age the sweep can read.
+      try
+      {
+         Craft::$app->getUsers()->setVerificationCodeOnUser($user);
+      }
+      catch (\Throwable $e)
+      {
+         Porter::warn('[Magic Link] Couldn’t stamp ' . $email . ' for cleanup: ' . $e->getMessage());
       }
 
       $groupIds = $this->registrationGroupIds();

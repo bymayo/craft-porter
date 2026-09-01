@@ -14,6 +14,7 @@
 
 ### Changed
 - A magic link now activates a pending account. Someone who registered but never clicked Craft's activation email can finish through the link instead of being stuck
+- Magic link registration creates the account as pending, and the link activates it. A sign up nobody confirms no longer leaves a live account behind. Set `purgePendingUsersDuration` in `config/general.php` to have Craft clear them away, as it defaults to off
 
 ## 5.3.1 - 2026-08-28
 
