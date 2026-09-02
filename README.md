@@ -52,6 +52,15 @@ You can also install via the Plugin Store by searching for `Porter`.
 - PHP 8.2
 - MySQL (no PostgreSQL support)
 
+## Documentation
+
+Full documentation is in [docs/](docs/contents.md).
+
+- [Get started](docs/get-started/installation.md) — install, requirements, first steps
+- [Features](docs/features/overview.md) — every feature, in depth
+- [Templating](docs/templating/twig.md) — Twig helpers and form components
+- [Scheduled tasks](docs/guides/scheduled-tasks.md) — the cron jobs Porter needs
+
 ## How to use
 
 The Delete Account, Deactivate Account and Magic Link forms all work the same way: drop the Twig helper into a template, optionally pass a properties hash to override the defaults, or copy the full form template into your project for total control.
