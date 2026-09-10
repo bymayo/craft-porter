@@ -1,5 +1,10 @@
 # Porter Changelog
 
+## 5.3.6 - 2026-09-10
+
+### Fixed
+- Expired, used or refused magic links returned a 404. They now redirect to the sign in screen, where the message is shown ([#16](https://github.com/bymayo/craft-porter/issues/16))
+
 ## 5.3.5 - 2026-09-01
 
 > [!WARNING]

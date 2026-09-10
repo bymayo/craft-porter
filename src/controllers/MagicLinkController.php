@@ -96,6 +96,36 @@ class MagicLinkController extends Controller
 
       }
 
+      // Returning nothing here 404s, and the flash validateToken() set is
+      // never rendered.
+      return $this->redirect($this->_failedAccessUrl());
+
+   }
+
+   /**
+    * Where someone who opened a dead link is sent.
+    */
+   private function _failedAccessUrl(): string
+   {
+
+      if (Craft::$app->getRequest()->getIsCpRequest())
+      {
+
+         $settings = Porter::getInstance()->helper->settings();
+
+         // Porter's screen renders the flash, Craft's doesn't - but it's
+         // all that's left if the screen has since been switched off.
+         return ($settings->magicLink && $settings->magicLinkControlPanel)
+            ? UrlHelper::cpUrl('magic-link')
+            : UrlHelper::cpUrl('login');
+
+      }
+
+      $loginPath = Craft::$app->getConfig()->getGeneral()->getLoginPath();
+
+      // Not always a path: false in headless mode, or if login is off.
+      return UrlHelper::siteUrl(is_string($loginPath) ? $loginPath : '');
+
    }
 
 }

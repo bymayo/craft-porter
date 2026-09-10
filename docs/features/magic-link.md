@@ -16,6 +16,10 @@ The user enters their address, gets a link, and clicking it signs them in. The f
 
 Switch on **Control Panel Access** and a **Sign in with a magic link** button appears on the control panel login screen, alongside the passkey option. It has its own sign in page that mirrors Craft's forgot-password screen.
 
+## Dead links
+
+An expired, used, or refused link redirects to the sign in screen — Craft's `loginPath` on the front end, Porter's own screen in the control panel. The message renders inside `magicLinkForm()`, so put the form on your login template to show it.
+
 ## Registering new users
 
 Switch on **Register New Users** and an unrecognised address creates the account rather than failing. The same form becomes sign up and sign in, and no password is ever chosen.
