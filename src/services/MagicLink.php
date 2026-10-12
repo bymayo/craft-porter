@@ -624,7 +624,7 @@ class MagicLink extends Component
 
             }
 
-            if (Craft::$app->getUser()->login($user))
+            if (Craft::$app->getUser()->login($user, Craft::$app->getConfig()->getGeneral()->userSessionDuration))
             {
 
                 if ($query->cpLogin)
