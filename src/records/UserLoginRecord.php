@@ -4,6 +4,7 @@ namespace bymayo\porter\records;
 
 use Craft;
 use craft\db\ActiveRecord;
+use craft\helpers\Db;
 
 /**
  * @property int $id
@@ -18,5 +19,16 @@ class UserLoginRecord extends ActiveRecord
     public static function tableName()
     {
         return '{{%porter_user_logins}}';
+    }
+
+    public static function stamp(int $userId, string $column): void
+    {
+        $now = Db::prepareDateForDb(new \DateTime());
+
+        Db::upsert(
+            static::tableName(),
+            ['userId' => $userId, 'ipHash' => '', 'uaHash' => '', $column => $now],
+            [$column => $now]
+        );
     }
 }

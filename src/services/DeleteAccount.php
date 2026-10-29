@@ -68,9 +68,7 @@ class DeleteAccount extends Component
    public function confirmationType()
    {
 
-      $confirmationType = $this->settings->deleteAccountConfirmationType;
-      
-      if ($confirmationType == 'confirmationTypeKeyword')
+      if (in_array($this->settings->deleteAccountConfirmationType, ['confirmationTypeKeyword', 'confirmationKeyword'], true))
       {
          return $this->settings->deleteAccountConfirmationKeyword;
       }
@@ -96,10 +94,12 @@ class DeleteAccount extends Component
 
       $confirmationField = $request->getBodyParam('confirmationField');
 
-      if ($currentUser && $currentUser->can('deleteUsers'))
+      if ($this->settings->deleteAccount && $currentUser && $currentUser->can('deleteUsers'))
       {
 
-         if ($this->confirmationType() == $confirmationField)
+         $expected = (string) $this->confirmationType();
+
+         if ($expected !== '' && $expected === (string) $confirmationField)
          {
 
             if ($currentUser->admin) {

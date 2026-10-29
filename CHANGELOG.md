@@ -1,5 +1,25 @@
 # Porter Changelog
 
+## 5.3.8 - 2026-10-29
+
+### Changed
+- Magic links now obey the `Front End Login` and `Control Panel Access` settings everywhere. Custom front-end forms need `Front End Login` on
+- Inactive cleanup always sends a reminder before deleting, so turning it on no longer deletes accounts straight away
+
+### Fixed
+- Magic link sign ups are now validated and can't create duplicate or unwanted accounts
+- Magic links work with a blank expiry, and return users to the page they wanted
+- Deactivating an account now logs the user out
+- Delete account asks for the keyword by default, and can't be confirmed when empty
+- Burner blocking covers email changes, allows international addresses, and survives DNS outages and console runs
+- No more false "new device" emails after reminders or "Sign in as"
+- The "Account deleted" email only sends once the account is actually deleted
+- The failed login email now sends when its threshold is at or above `maxInvalidLogins`
+- Emails use the user's own language and site
+- Password expiry no longer sends duplicate or missed emails, or flags users without a password
+- Confirm password is now checked on front-end registration
+- Saving settings no longer copies `config/porter.php` values into project config
+
 ## 5.3.7 - 2026-10-29
 
 ### Fixed

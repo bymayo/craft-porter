@@ -8,6 +8,7 @@ use bymayo\porter\records\UserLoginRecord;
 use Craft;
 use craft\base\Component;
 use craft\elements\User;
+use craft\helpers\DateTimeHelper;
 use craft\helpers\Db;
 
 class InactiveAccounts extends Component
@@ -30,20 +31,24 @@ class InactiveAccounts extends Component
          return $stats;
       }
 
-      $reminderDays = max(1, (int) $this->settings->inactiveAccountReminderDays);
-      $deleteDays = max($reminderDays + 1, (int) $this->settings->inactiveAccountDeleteDays);
+      $reminderDays = max(1, (int) $this->settings->inactiveAccountReminderDays ?: 365);
+      $deleteDays = max($reminderDays + 1, (int) $this->settings->inactiveAccountDeleteDays ?: 395);
+      $graceDays = $deleteDays - $reminderDays;
 
       $now = new \DateTime();
       $reminderCutoff = (clone $now)->modify("-{$reminderDays} days");
-      $deleteCutoff = (clone $now)->modify("-{$deleteDays} days");
+      $graceCutoff = (clone $now)->modify("-{$graceDays} days");
 
-      $candidates = User::find()
+      $candidateIds = User::find()
          ->status(User::STATUS_ACTIVE)
          ->admin(false)
          ->lastLoginDate('< ' . Db::prepareDateForDb($reminderCutoff))
-         ->all();
+         ->ids();
 
-      foreach ($candidates as $user)
+      foreach (array_chunk($candidateIds, 100) as $chunk)
+      {
+
+      foreach (User::find()->id($chunk)->status(null)->all() as $user)
       {
 
          if ($this->_canAccessCp($user))
@@ -51,7 +56,31 @@ class InactiveAccounts extends Component
             continue;
          }
 
-         if ($user->lastLoginDate < $deleteCutoff)
+         $record = UserLoginRecord::findOne(['userId' => $user->id]);
+
+         $remindedAt = $record && $record->inactiveReminderSentAt
+            ? DateTimeHelper::toDateTime($record->inactiveReminderSentAt)
+            : null;
+
+         if ($remindedAt && $user->lastLoginDate && $remindedAt < $user->lastLoginDate)
+         {
+            $remindedAt = null;
+         }
+
+         if (!$remindedAt)
+         {
+
+            Porter::getInstance()->emailNotifications->sendInactiveAccountReminder($user, $graceDays);
+
+            UserLoginRecord::stamp($user->id, 'inactiveReminderSentAt');
+
+            $stats['warned']++;
+
+            continue;
+
+         }
+
+         if ($remindedAt <= $graceCutoff)
          {
 
             // Soft delete, so the account lands in the trash and can be
@@ -61,33 +90,9 @@ class InactiveAccounts extends Component
                $stats['deleted']++;
             }
 
-            continue;
-
          }
 
-         $record = UserLoginRecord::findOne(['userId' => $user->id]);
-
-         if ($record && $record->inactiveReminderSentAt)
-         {
-            $sentAt = new \DateTime($record->inactiveReminderSentAt);
-            if ($user->lastLoginDate && $sentAt > $user->lastLoginDate)
-            {
-               continue;
-            }
-         }
-
-         Porter::getInstance()->emailNotifications->sendInactiveAccountReminder($user, $deleteDays);
-
-         if (!$record)
-         {
-            $record = new UserLoginRecord();
-            $record->userId = $user->id;
-         }
-
-         $record->inactiveReminderSentAt = Db::prepareDateForDb($now);
-         $record->save();
-
-         $stats['warned']++;
+      }
 
       }
 

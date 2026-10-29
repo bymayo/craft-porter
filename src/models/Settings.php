@@ -21,7 +21,7 @@ class Settings extends Model
 
     public $deleteAccount = 0;
 
-    public $deleteAccountConfirmationType = 'confirmationKeyword';
+    public $deleteAccountConfirmationType = 'confirmationTypeKeyword';
 
     public $deleteAccountConfirmationKeyword = 'DELETE';
 
@@ -244,6 +244,27 @@ class Settings extends Model
                 ['magicLinkThrottleLimit', 'magicLinkThrottleWindow', 'magicLinkMinResponseMs'],
                 'integer',
                 'min' => 0
+            ],
+            [
+                ['magicLinkExpirySeconds', 'inactiveAccountReminderDays', 'inactiveAccountDeleteDays'],
+                'required'
+            ],
+            [
+                ['magicLinkExpirySeconds', 'inactiveAccountReminderDays', 'inactiveAccountDeleteDays'],
+                'integer',
+                'min' => 1
+            ],
+            [
+                ['inactiveAccountDeleteDays'],
+                'compare',
+                'compareAttribute' => 'inactiveAccountReminderDays',
+                'operator' => '>',
+                'type' => 'number'
+            ],
+            [
+                ['deleteAccountConfirmationType'],
+                'in',
+                'range' => ['confirmationTypeKeyword', 'confirmationTypeField', 'confirmationKeyword']
             ],
             [
                 ['passwordPwnedFailMode'],

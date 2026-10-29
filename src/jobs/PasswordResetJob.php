@@ -23,6 +23,8 @@ class PasswordResetJob extends BaseBatchedJob
     */
    public bool $includeNeverChanged = false;
 
+   public ?array $userIds = null;
+
    public function init(): void
    {
 
@@ -42,9 +44,9 @@ class PasswordResetJob extends BaseBatchedJob
 
    protected function loadData(): Batchable
    {
-      return new PasswordResetBatcher(
-         Porter::getInstance()->passwordRetention->expiredUserIds($this->includeNeverChanged)
-      );
+      $this->userIds ??= Porter::getInstance()->passwordRetention->expiredUserIds($this->includeNeverChanged);
+
+      return new PasswordResetBatcher($this->userIds);
    }
 
    protected function processItem(mixed $item): void

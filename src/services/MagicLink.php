@@ -8,6 +8,7 @@ use bymayo\porter\records\MagicLinkRecord;
 
 use Craft;
 use craft\base\Component;
+use craft\base\Element;
 use craft\elements\User;
 use craft\helpers\UrlHelper;
 use craft\helpers\DateTimeHelper;
@@ -73,7 +74,7 @@ class MagicLink extends Component
    public function request($request)
    {
 
-        if (!$this->settings->magicLink)
+        if (!$this->enabledFor($request))
         {
             return;
         }
@@ -97,19 +98,36 @@ class MagicLink extends Component
             return $this->_requestSent($request, $start);
         }
 
-        $user = Craft::$app->getUsers()->getUserByUsernameOrEmail($email);
+        $mutex = Craft::$app->getMutex();
+        $lockName = 'porter:magic-link:' . md5(mb_strtolower($email));
 
-        $isNew = false;
+        if (!$mutex->acquire($lockName, 5))
+        {
+            return $this->_requestSent($request, $start);
+        }
 
-        // Passwordless sign up: no account yet, so make one and send them
-        // a link. The link is what proves they own the address.
-        if (!$user && $this->registrationEnabled())
+        try
         {
 
-           $user = $this->registerUser($email, $request);
+           $user = Craft::$app->getUsers()->getUserByUsernameOrEmail($email);
 
-           $isNew = $user !== null;
+           $isNew = false;
 
+           // Passwordless sign up: no account yet, so make one and send them
+           // a link. The link is what proves they own the address.
+           if (!$user && !$request->getIsCpRequest() && $this->registrationEnabled())
+           {
+
+              $user = $this->registerUser($email, $request);
+
+              $isNew = $user !== null;
+
+           }
+
+        }
+        finally
+        {
+           $mutex->release($lockName);
         }
 
         $token = $user ? $this->createToken($user, $isNew, $this->postedNewUserRedirect($request)) : false;
@@ -379,6 +397,20 @@ class MagicLink extends Component
     * Gated on Craft's own public registration setting, so this can't be used
     * to create users on a site that has deliberately switched it off.
     */
+   public function enabledFor($request): bool
+   {
+
+      if (!$this->settings->magicLink)
+      {
+         return false;
+      }
+
+      return $request->getIsCpRequest()
+         ? (bool) $this->settings->magicLinkControlPanel
+         : (bool) $this->settings->magicLinkFrontEnd;
+
+   }
+
    public function registrationEnabled(): bool
    {
 
@@ -416,9 +448,21 @@ class MagicLink extends Component
          $user->setFieldValuesFromRequest('fields');
       }
 
-      // Saved without validation on purpose: the password is machine
-      // generated, so running it through the password policy would be
-      // pointless, and would fire a Have I Been Pwned lookup on every sign up.
+      $userSettings = Craft::$app->getProjectConfig()->get('users') ?? [];
+
+      $user->setScenario(($userSettings['validateOnPublicRegistration'] ?? false)
+         ? Element::SCENARIO_LIVE
+         : User::SCENARIO_REGISTRATION);
+
+      if (!$user->validate(array_diff($user->activeAttributes(), ['newPassword'])))
+      {
+
+         Porter::warn('[Magic Link] Couldn’t register ' . $email . ': ' . implode(' ', $user->getErrorSummary(true)));
+
+         return null;
+
+      }
+
       if (!Craft::$app->getElements()->saveElement($user, false))
       {
 
@@ -574,6 +618,13 @@ class MagicLink extends Component
 
    }
 
+   private function expirySeconds(): int
+   {
+      $seconds = (int) $this->settings->magicLinkExpirySeconds;
+
+      return $seconds > 0 ? $seconds : 300;
+   }
+
    public function validateToken($token)
    {
 
@@ -596,13 +647,16 @@ class MagicLink extends Component
 
         $this->invalidateTokens($user);
 
-        if (DateTimeHelper::currentTimeStamp() <= (DateTimeHelper::toDateTime($query->dateCreated)->format('U') + $this->settings->magicLinkExpirySeconds))
+        if (DateTimeHelper::currentTimeStamp() <= ((int) DateTimeHelper::toDateTime($query->dateCreated)->format('U') + $this->expirySeconds()))
         {
 
             // Re-checked here, not just when the link was created: the account
             // could have been suspended, locked or flagged for a password
             // reset in the meantime.
-            if (!$this->canSignInWithLink($user))
+            $linkEnabled = $this->settings->magicLink
+                && ($query->cpLogin ? $this->settings->magicLinkControlPanel : $this->settings->magicLinkFrontEnd);
+
+            if (!$linkEnabled || !$this->canSignInWithLink($user))
             {
 
                 Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_magic_link_not_allowed'));
@@ -624,8 +678,6 @@ class MagicLink extends Component
 
             }
 
-            // Match a password login. Without a duration Yii skips the
-            // identity cookie, so the session ends when the browser closes.
             $duration = Craft::$app->getConfig()->getGeneral()->userSessionDuration;
 
             if (Craft::$app->getUser()->login($user, $duration))

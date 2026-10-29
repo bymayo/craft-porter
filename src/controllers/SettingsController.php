@@ -57,10 +57,15 @@ class SettingsController extends Controller
 
         }
 
-        Craft::$app->getPlugins()->savePluginSettings(
-            Porter::$plugin, 
-            $settings->getAttributes()
-        );
+        $postedKeys = array_intersect(array_keys($postedSettings), $settings->safeAttributes());
+
+        if (!Craft::$app->getPlugins()->savePluginSettings(Porter::$plugin, $settings->toArray($postedKeys)))
+        {
+
+            Craft::$app->getSession()->setError(Craft::t('porter', 'Couldn’t save plugin settings.'));
+            return null;
+
+        }
 
         $notice = Craft::t('porter', 'Plugin settings saved.');
         $errors = [];

@@ -118,9 +118,6 @@ class Porter extends Plugin
     /**
      * Fetches the disposable domain list the first time burner blocking is
      * switched on.
-     *
-     * The list isn't bundled, so without this the feature would look enabled
-     * while quietly blocking nothing until somebody ran the console command.
      */
     public function afterSaveSettings(): void
     {
@@ -129,12 +126,16 @@ class Porter extends Plugin
 
         $settings = $this->getSettings();
 
-        if ($settings && $settings->emailBurners && !$this->burnerEmails->hasList())
+        $cache = Craft::$app->getCache();
+
+        if ($settings && $settings->emailBurners && !$this->burnerEmails->hasList() && !$cache->get('porter:burnerListAttempted'))
         {
+
+            $cache->set('porter:burnerListAttempted', true, 86400);
 
             if ($this->burnerEmails->updateList() === null)
             {
-                Craft::$app->getSession()->setError(Craft::t('porter', 'Couldn’t download the disposable domain list. Run `porter/burner-emails/update` to try again.'));
+                Porter::warn('[Burner Emails] Couldn’t download the disposable domain list, so the bundled copy is being used. Run `porter/burner-emails/update` to try again.');
             }
 
         }
@@ -346,6 +347,14 @@ class Porter extends Plugin
 
         Event::on(
             Users::class,
+            Users::EVENT_AFTER_LOCK_USER,
+            function (UserEvent $event) {
+                Porter::getInstance()->emailNotifications->sendFailedLoginAttemptsOnLock($event->user);
+            }
+        );
+
+        Event::on(
+            Users::class,
             Users::EVENT_AFTER_DEACTIVATE_USER,
             function (UserEvent $event) {
                 Porter::getInstance()->emailNotifications->sendAccountDeactivated($event->user);
@@ -356,6 +365,16 @@ class Porter extends Plugin
             User::class,
             User::EVENT_BEFORE_DELETE,
             function (CraftModelEvent $event) {
+                if ($event->sender instanceof User) {
+                    Porter::getInstance()->emailNotifications->captureAccountDeleted($event->sender);
+                }
+            }
+        );
+
+        Event::on(
+            User::class,
+            User::EVENT_AFTER_DELETE,
+            function (Event $event) {
                 if ($event->sender instanceof User) {
                     Porter::getInstance()->emailNotifications->sendAccountDeleted($event->sender);
                 }
@@ -416,16 +435,18 @@ class Porter extends Plugin
                 // Only when the address is actually new or changed. It used
                 // to run on every save, so editing any user in the control
                 // panel sent their address off for a DNS or API lookup.
-                if ($this->settings->emailBurners && $this->burnerEmails->shouldCheck($user))
+                $address = $this->settings->emailBurners ? $this->burnerEmails->addressToCheck($user) : null;
+
+                if ($address)
                 {
 
-                    $errors = $this->burnerEmails->check($user->email);
+                    $errors = $this->burnerEmails->check($address);
 
                     foreach ($errors as $error) {
                         $user->addError('email', $error);
                     }
 
-                    if ($errors)
+                    if ($errors && !Craft::$app->getRequest()->getIsConsoleRequest())
                     {
                         Craft::$app->getSession()->setFlash('porter', implode(' ', $errors));
                     }

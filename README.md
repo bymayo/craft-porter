@@ -124,7 +124,7 @@ For full markup control, copy `bymayo/porter/src/templates/components/deactivate
 
 ### Magic Link
 
-Sign in via a link emailed to the user's inbox. Enable under `Settings > Porter > Login`.
+Sign in via a link emailed to the user's inbox. Enable under `Settings > Porter > Login`, then switch on `Front End Login`, `Control Panel Access` or both. Each one controls whether links can be requested and used there, including from your own forms.
 
 ```twig
 {{ craft.porter.magicLinkForm() }}
@@ -195,7 +195,7 @@ Warn users who haven't signed in for a while, then delete them if they don't ret
 0 3 * * * cd /path/to/site && php craft porter/users/cleanup-inactive
 ```
 
-Each run emails users past the reminder threshold (once per inactive period, and signing back in resets it), then deletes accounts past the delete threshold. Deleted users get the `Account Deleted` notification if it's enabled.
+Each run emails users past the reminder threshold (once per inactive period, and signing back in resets it), then deletes accounts past the delete threshold. An account is only deleted once it has had a reminder and the gap between the two thresholds has passed since, so switching cleanup on never deletes anyone straight away. Deleted users get the `Account Deleted` notification if it's enabled.
 
 Accounts are soft deleted, so they land in Craft's trash and can be restored from `Users` with the status filter set to `Trashed`. Craft purges them once they're older than [`softDeleteDuration`](https://craftcms.com/docs/5.x/reference/config/general.html#softdeleteduration), 30 days by default.
 

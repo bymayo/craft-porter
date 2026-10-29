@@ -68,7 +68,7 @@ class MagicLinkController extends Controller
 
       if ($result === 'cp')
       {
-          return $this->redirect(UrlHelper::cpUrl(Craft::$app->getConfig()->getGeneral()->getPostCpLoginRedirect()));
+          return $this->_redirectToReturnUrl(UrlHelper::cpUrl(Craft::$app->getConfig()->getGeneral()->getPostCpLoginRedirect()));
       }
 
       if ($result)
@@ -92,13 +92,24 @@ class MagicLinkController extends Controller
 
           }
 
-          return $this->redirect(UrlHelper::siteUrl(Craft::$app->getConfig()->getGeneral()->getPostLoginRedirect()));
+          return $this->_redirectToReturnUrl(UrlHelper::siteUrl(Craft::$app->getConfig()->getGeneral()->getPostLoginRedirect()));
 
       }
 
       // Returning nothing here 404s, and the flash validateToken() set is
       // never rendered.
       return $this->redirect($this->_failedAccessUrl());
+
+   }
+
+   private function _redirectToReturnUrl(string $default)
+   {
+
+      $userSession = Craft::$app->getUser();
+      $url = $userSession->getReturnUrl($default);
+      $userSession->removeReturnUrl();
+
+      return $this->redirect($url);
 
    }
 

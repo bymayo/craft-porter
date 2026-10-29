@@ -9,6 +9,7 @@ use Craft;
 use craft\base\Component;
 use craft\db\Query;
 use craft\elements\User;
+use craft\helpers\Session;
 use yii\db\IntegrityException;
 
 class EmailNotifications extends Component
@@ -19,6 +20,8 @@ class EmailNotifications extends Component
    private static array $pendingPasswordChanges = [];
 
    private static array $pendingEmailChanges = [];
+
+   private static array $pendingDeletes = [];
 
    public function init(): void
    {
@@ -63,6 +66,11 @@ class EmailNotifications extends Component
          return;
       }
 
+      if (Session::get(User::IMPERSONATE_KEY))
+      {
+         return;
+      }
+
       $ipAddress = $request->getUserIP() ?: '';
       $userAgent = $request->getUserAgent() ?: '';
 
@@ -84,7 +92,6 @@ class EmailNotifications extends Component
          }
          catch (IntegrityException $e)
          {
-            // A concurrent login for the same user created the row first
          }
 
          return;
@@ -101,7 +108,9 @@ class EmailNotifications extends Component
          return;
       }
 
-      if ($this->settings->emailNewDeviceLogin)
+      $hasDevice = (string) $record->ipHash !== '' || (string) $record->uaHash !== '';
+
+      if ($hasDevice && $this->settings->emailNewDeviceLogin)
       {
 
          Porter::getInstance()->helper->notify(
@@ -287,8 +296,33 @@ class EmailNotifications extends Component
 
    }
 
+   public function captureAccountDeleted(User $user)
+   {
+
+      if (!$user->id)
+      {
+         return;
+      }
+
+      if ($user->trashed || $user->getStatus() === User::STATUS_PENDING)
+      {
+         unset(self::$pendingDeletes[$user->id]);
+         return;
+      }
+
+      self::$pendingDeletes[$user->id] = true;
+
+   }
+
    public function sendAccountDeleted(User $user)
    {
+
+      if (!$user->id || !isset(self::$pendingDeletes[$user->id]))
+      {
+         return;
+      }
+
+      unset(self::$pendingDeletes[$user->id]);
 
       if (!$this->settings->emailAccountDeleted || !$user->email)
       {
@@ -342,11 +376,44 @@ class EmailNotifications extends Component
 
       $threshold = max(1, (int) $this->settings->emailFailedLoginAttemptsThreshold);
       $count = (int) $user->invalidLoginCount;
+      $maxInvalidLogins = (int) Craft::$app->getConfig()->getGeneral()->maxInvalidLogins;
+
+      if ($maxInvalidLogins && $threshold >= $maxInvalidLogins)
+      {
+         return;
+      }
 
       if ($count !== $threshold)
       {
          return;
       }
+
+      $this->_sendFailedLoginAttempts($user, $count, $threshold);
+
+   }
+
+   public function sendFailedLoginAttemptsOnLock(User $user)
+   {
+
+      if (!$user->id || !$user->email || !$this->settings->emailFailedLoginAttempts)
+      {
+         return;
+      }
+
+      $threshold = max(1, (int) $this->settings->emailFailedLoginAttemptsThreshold);
+      $maxInvalidLogins = (int) Craft::$app->getConfig()->getGeneral()->maxInvalidLogins;
+
+      if (!$maxInvalidLogins || $threshold < $maxInvalidLogins)
+      {
+         return;
+      }
+
+      $this->_sendFailedLoginAttempts($user, $maxInvalidLogins, $threshold);
+
+   }
+
+   private function _sendFailedLoginAttempts(User $user, int $count, int $threshold)
+   {
 
       $ipAddress = '';
 

@@ -62,7 +62,7 @@
                 ]
             }) }}
 
-            <div id="confirmationTypeKeyword"{% if settings['deleteAccountConfirmationType'] != 'confirmationKeyword' %} class="hidden"{% endif %}>
+            <div id="confirmationTypeKeyword"{% if settings['deleteAccountConfirmationType'] not in ['confirmationTypeKeyword', 'confirmationKeyword'] %} class="hidden"{% endif %}>
                 {{ forms.textField({
                     label: 'Confirmation Keyword',
                     instructions: 'The word users must type to confirm deletion.',
@@ -72,7 +72,7 @@
                 }}
             </div>
 
-            <div id="confirmationTypeField"{% if settings['deleteAccountConfirmationType'] != 'confirmationField' %} class="hidden"{% endif %}>
+            <div id="confirmationTypeField"{% if settings['deleteAccountConfirmationType'] != 'confirmationTypeField' %} class="hidden"{% endif %}>
                 {{ forms.selectField({
                     label: 'Confirmation Field',
                     instructions: 'The user field that must match to confirm deletion.',
@@ -156,15 +156,17 @@
                 id: 'inactiveAccountReminderDays',
                 name: 'settings[inactiveAccountReminderDays]',
                 value: settings['inactiveAccountReminderDays'],
+                errors: settings.getErrors('inactiveAccountReminderDays'),
                 size: 4
             }) }}
 
             {{ forms.textField({
                 label: 'Delete after',
-                instructions: 'Days of inactivity before the account is deleted.',
+                instructions: 'Days of inactivity before the account is deleted. Accounts are always given a reminder first, and at least the gap between these two values to sign back in.',
                 id: 'inactiveAccountDeleteDays',
                 name: 'settings[inactiveAccountDeleteDays]',
                 value: settings['inactiveAccountDeleteDays'],
+                errors: settings.getErrors('inactiveAccountDeleteDays'),
                 size: 4
             }) }}
 
@@ -206,7 +208,8 @@
                 instructions: 'Seconds before a magic link expires.',
                 id: 'magicLinkExpirySeconds',
                 name: 'settings[magicLinkExpirySeconds]',
-                value: settings['magicLinkExpirySeconds']})
+                value: settings['magicLinkExpirySeconds'],
+                errors: settings.getErrors('magicLinkExpirySeconds')})
             }}
 
             {{ forms.textField({
@@ -264,7 +267,7 @@
 
         {{ forms.textField({
             label: 'Threshold',
-            instructions: 'Failed sign in attempts that trigger the notification email.',
+            instructions: 'Failed sign in attempts that trigger the notification email. If this is at or above Craft’s `maxInvalidLogins`, the email is sent when the account locks. Craft only counts attempts when `maxInvalidLogins` is set.',
             id: 'emailFailedLoginAttemptsThreshold',
             name: 'settings[emailFailedLoginAttemptsThreshold]',
             value: settings['emailFailedLoginAttemptsThreshold'],

@@ -254,25 +254,22 @@ class PasswordRetention extends Component
          return false;
       }
 
-      // Already flagged, so there's nothing to do and no second email to send.
-      // This is what makes paging over a stable set safe.
-      if ($this->resetRequired($user))
+      unset($this->meta[$user->id]);
+
+      $flagged = Db::update(
+         Table::USERS,
+         ['passwordResetRequired' => true],
+         ['id' => $user->id, 'passwordResetRequired' => false]
+      );
+
+      if (!$flagged)
       {
          return false;
       }
 
       $user->passwordResetRequired = true;
 
-      unset($this->meta[$user->id]);
-
-      if (!Craft::$app->getElements()->saveElement($user, false))
-      {
-
-         Porter::warn('[Password Retention] Couldn’t flag user ' . $user->id . ' for a password reset.');
-
-         return false;
-
-      }
+      Craft::$app->getElements()->invalidateCachesForElement($user);
 
       Porter::getInstance()->emailNotifications->sendPasswordExpired($user);
 
@@ -289,6 +286,11 @@ class PasswordRetention extends Component
    {
 
       $warned = 0;
+
+      if (!$this->settings->emailPasswordExpiring)
+      {
+         return $warned;
+      }
 
       foreach (array_chunk($this->expiringSoonUserIds(), 500) as $chunk)
       {
@@ -539,7 +541,7 @@ class PasswordRetention extends Component
 
       $this->meta[$userId] = [
          'lastPasswordChangeDate' => !empty($row['lastPasswordChangeDate'])
-            ? DateTimeHelper::toDateTime($row['lastPasswordChangeDate'], true) ?: null
+            ? DateTimeHelper::toDateTime($row['lastPasswordChangeDate']) ?: null
             : null,
          'passwordResetRequired' => (bool) ($row['passwordResetRequired'] ?? false)
       ];
@@ -586,7 +588,7 @@ class PasswordRetention extends Component
          $query->andWhere([
             'or',
             ['<', 'users.lastPasswordChangeDate', Db::prepareDateForDb($cutoff)],
-            ['users.lastPasswordChangeDate' => null]
+            ['and', ['users.lastPasswordChangeDate' => null], ['not', ['users.password' => null]]]
          ]);
       }
       else
@@ -696,28 +698,13 @@ class PasswordRetention extends Component
          return true;
       }
 
-      return new \DateTime($record->passwordExpiryReminderSentAt) > $changedAt;
+      return DateTimeHelper::toDateTime($record->passwordExpiryReminderSentAt) > $changedAt;
 
    }
 
    private function _markExpiryReminderSent(User $user): void
    {
-
-      $record = UserLoginRecord::findOne(['userId' => $user->id]);
-
-      if (!$record)
-      {
-         // ipHash/uaHash are notNull on installs created by the
-         // m260430 migration, so seed them rather than blow up here.
-         $record = new UserLoginRecord();
-         $record->userId = $user->id;
-         $record->ipHash = '';
-         $record->uaHash = '';
-      }
-
-      $record->passwordExpiryReminderSentAt = Db::prepareDateForDb(new \DateTime());
-      $record->save();
-
+      UserLoginRecord::stamp($user->id, 'passwordExpiryReminderSentAt');
    }
 
 }

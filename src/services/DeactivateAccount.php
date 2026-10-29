@@ -7,6 +7,7 @@ use bymayo\porter\services\Helper;
 
 use Craft;
 use craft\base\Component;
+use craft\errors\InvalidElementException;
 use craft\helpers\Template;
 
 class DeactivateAccount extends Component
@@ -88,23 +89,40 @@ class DeactivateAccount extends Component
 
             }
 
-            if (Craft::$app->getUsers()->deactivateUser($currentUser))
+            try
+            {
+               Craft::$app->getUsers()->deactivateUser($currentUser);
+            }
+            catch (InvalidElementException $e)
             {
 
-               Craft::$app->getUser()->logout(false);
+               Craft::error('Couldn\'t deactivate user ' . $currentUser->id . ': ' . $e->getMessage(), __METHOD__);
 
                if ($request->getAcceptsJson())
                {
                   return [
-                     'success' => true,
-                     'message' => Craft::t('porter', 'porter_deactivate_account_flash_success')
+                     'success' => false,
+                     'message' => Craft::t('porter', 'porter_deactivate_account_flash_permission')
                   ];
                }
 
-               Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_deactivate_account_flash_success'));
-               return $this->settings->deactivateAccountRedirect;
+               Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_deactivate_account_flash_permission'));
+               return false;
 
             }
+
+            Craft::$app->getUser()->logout(false);
+
+            if ($request->getAcceptsJson())
+            {
+               return [
+                  'success' => true,
+                  'message' => Craft::t('porter', 'porter_deactivate_account_flash_success')
+               ];
+            }
+
+            Craft::$app->getSession()->setFlash('porter', Craft::t('porter', 'porter_deactivate_account_flash_success'));
+            return $this->settings->deactivateAccountRedirect;
 
          }
          else {

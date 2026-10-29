@@ -6,7 +6,9 @@ use bymayo\porter\Porter;
 
 use Craft;
 use craft\base\Component;
+use craft\helpers\App;
 use craft\helpers\FileHelper;
+use yii\validators\EmailValidator;
 
 /**
  * Blocks disposable and undeliverable email addresses.
@@ -40,6 +42,8 @@ class BurnerEmails extends Component
 
    private ?array $domains = null;
 
+   private ?bool $dnsWorks = null;
+
    public function init(): void
    {
       $this->settings = Porter::getInstance()->helper->settings();
@@ -52,27 +56,34 @@ class BurnerEmails extends Component
     * user save, and pointless when the address hasn't moved - an admin
     * editing somebody's name shouldn't fire either.
     */
-   public function shouldCheck(\craft\elements\User $user): bool
+   public function addressToCheck(\craft\elements\User $user): ?string
    {
-
-      if (!$user->email)
-      {
-         return false;
-      }
 
       if (!$user->id)
       {
          // A brand new account, which is the case that matters.
-         return true;
+         return $user->unverifiedEmail ?: ($user->email ?: null);
       }
 
       $current = (new \craft\db\Query())
-         ->select('email')
+         ->select(['email', 'unverifiedEmail'])
          ->from('{{%users}}')
          ->where(['id' => $user->id])
-         ->scalar();
+         ->one();
 
-      return $current === false || mb_strtolower((string) $current) !== mb_strtolower($user->email);
+      foreach (['unverifiedEmail', 'email'] as $attribute)
+      {
+
+         $address = $user->$attribute;
+
+         if ($address && (!$current || mb_strtolower((string) $current[$attribute]) !== mb_strtolower($address)))
+         {
+            return $address;
+         }
+
+      }
+
+      return null;
 
    }
 
@@ -114,7 +125,12 @@ class BurnerEmails extends Component
    public function domain(string $email): ?string
    {
 
-      if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+      $validator = new EmailValidator([
+         'enableIDN' => App::supportsIdn(),
+         'enableLocalIDN' => App::supportsIdn(),
+      ]);
+
+      if (!$validator->validate($email))
       {
          return null;
       }
@@ -126,7 +142,15 @@ class BurnerEmails extends Component
          return null;
       }
 
-      return mb_strtolower(substr($email, $at + 1));
+      $domain = mb_strtolower(substr($email, $at + 1));
+
+      if (function_exists('idn_to_ascii') && preg_match('/[^\x20-\x7e]/', $domain))
+      {
+         $ascii = idn_to_ascii($domain, IDNA_NONTRANSITIONAL_TO_ASCII, INTL_IDNA_VARIANT_UTS46);
+         $domain = $ascii ?: $domain;
+      }
+
+      return $domain;
 
    }
 
@@ -152,7 +176,14 @@ class BurnerEmails extends Component
 
       try
       {
-         return checkdnsrr($domain, 'MX') || checkdnsrr($domain, 'A');
+
+         if (checkdnsrr($domain, 'MX') || checkdnsrr($domain, 'A') || checkdnsrr($domain, 'AAAA'))
+         {
+            return true;
+         }
+
+         return !$this->dnsWorks();
+
       }
       catch (\Throwable $e)
       {
@@ -160,6 +191,11 @@ class BurnerEmails extends Component
          return true;
       }
 
+   }
+
+   private function dnsWorks(): bool
+   {
+      return $this->dnsWorks ??= checkdnsrr('gmail.com', 'MX');
    }
 
    /**

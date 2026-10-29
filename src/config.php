@@ -18,7 +18,7 @@ return [
 
     // Delete Account
     'deleteAccount' => false,
-    'deleteAccountConfirmationType' => 'confirmationKeyword',
+    'deleteAccountConfirmationType' => 'confirmationTypeKeyword',
     'deleteAccountConfirmationKeyword' => 'DELETE',
     'deleteAccountConfirmationField' => 'email',
     'deleteAccountRedirect' => '/', // Where users are sent afterwards

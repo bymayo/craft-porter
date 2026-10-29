@@ -92,7 +92,7 @@ class PasswordPolicy extends Component
 
       $request = Craft::$app->getRequest();
 
-      if ($request->getIsConsoleRequest() || $request->getBodyParam('newPassword') === null)
+      if ($request->getIsConsoleRequest() || ($request->getBodyParam('newPassword') === null && $request->getBodyParam('password') === null))
       {
          return null;
       }
