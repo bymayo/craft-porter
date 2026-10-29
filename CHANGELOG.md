@@ -1,5 +1,11 @@
 # Porter Changelog
 
+## 5.3.7 - 2026-10-29
+
+### Fixed
+- Magic link sign ins now last as long as a normal login, instead of ending when the browser closes ([#17](https://github.com/bymayo/craft-porter/issues/17))
+- Double-clicking the login button no longer shows an error page on a user's first login ([#19](https://github.com/bymayo/craft-porter/issues/19))
+
 ## 5.3.6 - 2026-09-10
 
 ### Fixed

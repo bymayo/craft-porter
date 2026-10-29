@@ -624,7 +624,11 @@ class MagicLink extends Component
 
             }
 
-            if (Craft::$app->getUser()->login($user))
+            // Match a password login. Without a duration Yii skips the
+            // identity cookie, so the session ends when the browser closes.
+            $duration = Craft::$app->getConfig()->getGeneral()->userSessionDuration;
+
+            if (Craft::$app->getUser()->login($user, $duration))
             {
 
                 if ($query->cpLogin)

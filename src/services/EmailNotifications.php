@@ -9,6 +9,7 @@ use Craft;
 use craft\base\Component;
 use craft\db\Query;
 use craft\elements\User;
+use yii\db\IntegrityException;
 
 class EmailNotifications extends Component
 {
@@ -76,7 +77,16 @@ class EmailNotifications extends Component
          $record->userId = $user->id;
          $record->ipHash = $ipHash;
          $record->uaHash = $uaHash;
-         $record->save();
+
+         try
+         {
+            $record->save();
+         }
+         catch (IntegrityException $e)
+         {
+            // A concurrent login for the same user created the row first
+         }
+
          return;
       }
 
